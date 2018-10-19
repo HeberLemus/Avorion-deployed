@@ -282,7 +282,8 @@ function SectorSpecifics:initialize(x, y, serverSeed)
     if self.generationTemplate and self.generationTemplate.ancientGates then
         self.ancientGates = self.generationTemplate.ancientGates(x, y, serverSeed)
     end
-end
+    end
+    end
 
 function SectorSpecifics:getScript()
     if self.generationTemplate then
