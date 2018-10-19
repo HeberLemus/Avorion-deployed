@@ -27,7 +27,7 @@ function SectorTemplate.generate(player, seed, x, y)
     local generator = SectorGenerator(x, y)
     generator:createRandomWormHole()
 
-    Sector():addScript("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
+    Sector():addScriptOnce("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
 
     generator:addAmbientEvents()
     Placer.resolveIntersections()

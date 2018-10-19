@@ -6,11 +6,9 @@ require ("utility")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function onInstalled(seed, rarity)
-    if onClient() then
-        if rarity == Rarity(RarityType.Legendary) then
-            Player():registerCallback("onStartDialog", "onStartDialog")
-        end
+function onInstalled(seed, rarity, permanent)
+    if onClient() and Player() and rarity == Rarity(RarityType.Legendary) then
+        Player():registerCallback("onStartDialog", "onStartDialog")
     end
 end
 
@@ -33,7 +31,7 @@ function onHarnessPower(entityId)
     end
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -52,9 +50,9 @@ function getIcon(seed, rarity)
     end
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     if rarity == Rarity(RarityType.Legendary) then
-        return 250 * 1000 * 1000
+        return 250 * 1000 * 100
     else
         return 0
     end
@@ -64,14 +62,14 @@ function getPrice(seed, rarity)
     return 5000
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     return
     {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+--        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity, permanent), icon = "data/textures/icons/turret.png"}
     }
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     if rarity == Rarity(RarityType.Legendary) then
         return
         {

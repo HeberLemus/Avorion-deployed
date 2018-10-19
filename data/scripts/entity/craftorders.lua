@@ -180,7 +180,9 @@ local function checkCaptain()
     end
 
     local faction = Faction()
-    faction:sendChatMessage("", 1, "Your ship has no captain!"%_t)
+    if faction then
+        faction:sendChatMessage("", 1, "Your ship has no captain!"%_t)
+    end
 end
 
 local function removeSpecialOrders()
@@ -234,17 +236,23 @@ end
 
 function CraftOrders.onGuardButtonPressed()
     if onClient() then
-        invokeServerFunction("onGuardButtonPressed")
+        invokeServerFunction("guardPosition", Entity().translationf)
         ScriptUI():stopInteraction()
+        return
+    end
+end
+
+function CraftOrders.guardPosition(position)
+    if onClient() then
+        invokeServerFunction("guardPosition", position)
         return
     end
 
     if checkCaptain() then
         removeSpecialOrders()
 
-        local pos = Entity().translationf
-        ShipAI():setGuard(pos)
-        CraftOrders.setAIAction(AIAction.Guard, nil, pos)
+        ShipAI():setGuard(position)
+        CraftOrders.setAIAction(AIAction.Guard, nil, position)
     end
 end
 
@@ -265,10 +273,12 @@ function CraftOrders.escortEntity(index)
         return
     end
 
-    if checkCaptain() then
+    local target = Entity(index)
+
+    if checkCaptain() and target then
         removeSpecialOrders()
 
-        ShipAI():setEscort(Entity(index))
+        ShipAI():setEscort(target)
         CraftOrders.setAIAction(AIAction.Escort, index)
     end
 end
@@ -279,11 +289,13 @@ function CraftOrders.attackEntity(index)
         return
     end
 
-    if checkCaptain() then
+    local target = Entity(index)
+
+    if checkCaptain() and target then
         removeSpecialOrders()
 
         local ai = ShipAI()
-        ai:setAttack(Entity(index))
+        ai:setAttack(target)
         CraftOrders.setAIAction(AIAction.Attack, index)
     end
 end
@@ -309,11 +321,12 @@ function CraftOrders.flyThroughWormhole(index)
         return
     end
 
-    if checkCaptain() then
+    local target = Entity(index)
+
+    if checkCaptain() and target then
         removeSpecialOrders()
 
         local ship = Entity()
-        local target = Entity(index)
 
         if target:hasComponent(ComponentType.Plan) then
             -- gate
@@ -344,8 +357,15 @@ end
 
 function CraftOrders.onAttackEnemiesButtonPressed()
     if onClient() then
-        invokeServerFunction("onAttackEnemiesButtonPressed")
+        invokeServerFunction("attackEnemies")
         ScriptUI():stopInteraction()
+        return
+    end
+end
+
+function CraftOrders.attackEnemies()
+    if onClient() then
+        invokeServerFunction("attackEnemies")
         return
     end
 
@@ -359,8 +379,15 @@ end
 
 function CraftOrders.onPatrolButtonPressed()
     if onClient() then
-        invokeServerFunction("onPatrolButtonPressed")
+        invokeServerFunction("patrolSector")
         ScriptUI():stopInteraction()
+        return
+    end
+end
+
+function CraftOrders.patrolSector()
+    if onClient() then
+        invokeServerFunction("patrolSector")
         return
     end
 
@@ -374,8 +401,15 @@ end
 
 function CraftOrders.onMineButtonPressed()
     if onClient() then
-        invokeServerFunction("onMineButtonPressed")
+        invokeServerFunction("mine")
         ScriptUI():stopInteraction()
+        return
+    end
+end
+
+function CraftOrders.mine()
+    if onClient() then
+        invokeServerFunction("mine")
         return
     end
 
@@ -389,8 +423,22 @@ end
 
 function CraftOrders.onSalvageButtonPressed()
     if onClient() then
-        invokeServerFunction("onSalvageButtonPressed")
+        invokeServerFunction("salvage")
         ScriptUI():stopInteraction()
+        return
+    end
+
+    if checkCaptain() then
+        removeSpecialOrders()
+
+        Entity():addScript("ai/salvage.lua")
+        CraftOrders.setAIAction(AIAction.Salvage)
+    end
+end
+
+function CraftOrders.salvage()
+    if onClient() then
+        invokeServerFunction("salvage")
         return
     end
 

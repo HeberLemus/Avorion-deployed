@@ -141,6 +141,7 @@ end
 
 function Gate.factor(providingFaction, orderingFaction)
 
+    if not providingFaction or not orderingFaction then return 0 end
     if orderingFaction.index == providingFaction.index then return 0 end
 
     local relation = 0

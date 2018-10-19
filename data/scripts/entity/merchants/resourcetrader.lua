@@ -420,6 +420,7 @@ end
 
 -- server sided
 function ResourceDepot.buy(material, amount)
+    if not material then return end
 
     amount = amount or 0
     if amount <= 0 then return end
@@ -459,6 +460,7 @@ function ResourceDepot.buy(material, amount)
 end
 
 function ResourceDepot.sell(material, amount)
+    if not material then return end
 
     amount = amount or 0
     if amount <= 0 then return end
@@ -515,7 +517,7 @@ function ResourceDepot.improveRelations(numTraded, ship, buyer)
     local gain = numTraded / 20
     gain = math.min(gain, gainable)
 
-    -- mining ships get higher relation gain
+    -- mining/unarmed ships get higher relation gain
     if ship:getNumUnarmedTurrets() > ship:getNumArmedTurrets() then
         gain = gain * 1.5
     end

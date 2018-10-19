@@ -120,7 +120,7 @@ ShipUtility.PersecutorTorpedoes = PersecutorTorpedoes
 function ShipUtility.getMaxVolumes()
     local maxVolumes = {}
 
-    local base = 3000
+    local base = 2000
     local scale = 2.5
 
     -- base class (explorer)
@@ -423,8 +423,10 @@ function ShipUtility.addSpecializedEquipment(craft, weaponTypes, torpedoTypes, t
             rarity = ShipUtility.getPDCRarity()
         end
 
-        local turret = TurretGenerator.generate(x, y, 0, rarity, weaponType, nil)
-        ShipUtility.addTurretsToCraft(craft, turret, turrets)
+        if weaponType then
+            local turret = TurretGenerator.generate(x, y, 0, rarity, weaponType, nil)
+            ShipUtility.addTurretsToCraft(craft, turret, turrets)
+        end
     end
 
     if #torpedoTypes > 0 and torpedofactor > 0 then

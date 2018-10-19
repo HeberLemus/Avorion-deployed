@@ -32,6 +32,7 @@ function Scientist.createSatellite(position)
        ComponentType.Durability,
        ComponentType.PlanMaxDurability,
        ComponentType.EnergySystem,
+       ComponentType.InteractionText,
        ComponentType.Loot
        )
 
@@ -80,10 +81,10 @@ function Scientist.createLightningTurret()
     local weapons = {turret:getWeapons()}
     turret:clearWeapons()
     for _, weapon in pairs(weapons) do
-        weapon.damage = 500
+        weapon.damage = 50000
         weapon.fireRate = 2
-        weapon.reach = 600
-        weapon.accuracy = 0.97
+        weapon.reach = 1500
+        weapon.accuracy = 0.99
         turret:addWeapon(weapon)
     end
     turret.turningSpeed = 2.0

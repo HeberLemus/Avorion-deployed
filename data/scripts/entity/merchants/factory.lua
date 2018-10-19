@@ -570,7 +570,7 @@ function Factory.buildConfigUI(tab)
 
     -- error labels
     local lister = UIVerticalLister(vsplit:partition(2), 15, 0)
-    local label = tab:createLabel(Rect(), ""%_t, 6)
+    local label = tab:createLabel(Rect(), "", 6)
     lister:placeElementTop(label)
     label.centered = true
     lister:nextRect(0)
@@ -590,7 +590,7 @@ function Factory.buildConfigUI(tab)
     lister:nextRect(32)
 
 
-    local label = tab:createLabel(Rect(), ""%_t, 12)
+    local label = tab:createLabel(Rect(), "", 12)
     lister:placeElementTop(label)
     label.centered = true
 
@@ -734,6 +734,8 @@ function Factory.setConfig(config)
             deliveringStationsCombos[a]:setSelectedIndexNoCallback(0)
         end
     else
+        if not config then return end
+
         -- apply config to factory settings
         local owner, station, player = checkEntityInteractionPermissions(Entity(), AlliancePrivilege.ManageStations)
         if not owner then return end

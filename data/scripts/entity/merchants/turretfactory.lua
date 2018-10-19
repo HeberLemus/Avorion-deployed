@@ -380,7 +380,7 @@ function initUI()
         table.insert(lines, line)
     end
 
-    buildButton = container:createButton(Rect(), "Build"%_t, "onBuildButtonPressed")
+    buildButton = container:createButton(Rect(), "Build /*Turret Factory Button*/"%_t, "onBuildButtonPressed")
     local organizer = UIOrganizer(right)
     organizer.margin = 10
     organizer:placeElementBottomRight(buildButton)
@@ -837,6 +837,7 @@ function onShowWindow()
 end
 
 function buildTurret(weaponType, rarity, material, clientIngredients)
+    if anynils(weaponType, rarity, material, clientIngredients) then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end

@@ -197,7 +197,7 @@ end
 
 function Balancing_GetSectorMiningDPS(x, y)
     -- this is a good value for mining lasers in the beginning
-    local dps = 30.0 * 5
+    local dps = 3.0
 
     local materialFactor = 1.0 + (Balancing_GetSectorMaterialStrength(x, y) - 1.0) * 0.1
 
@@ -350,6 +350,11 @@ end
 
 function Balancing_GetBlockRingMax()
     return blockRingMax;
+end
+
+function Balancing_InsideRing(x, y)
+    local d2 = x * x + y * y
+    return d2 < blockRingMin * blockRingMin
 end
 
 function Balancing_GetDamageFactor(difficulty)

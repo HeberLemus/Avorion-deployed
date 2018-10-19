@@ -48,7 +48,8 @@ end
 
 function startFlyAway(ship)
     -- player crafts should NEVER fly away since this will DELETE the ship
-    if Faction().isPlayer or Faction().isAlliance then
+    local faction = Faction()
+    if faction and (faction.isPlayer or faction.isAlliance) then
         print ("Warning: A player craft wanted to enter trader fly away stage")
         terminate()
         return

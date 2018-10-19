@@ -74,20 +74,20 @@ function getHistorySize(seed, rarity)
         math.randomseed(seed)
 
         if rarity.value == 5 then
-            return getInt(10, 20)
+            return getInt(7, 15)
         elseif rarity.value == 4 then
-            return getInt(5, 9)
+            return getInt(4, 6)
         elseif rarity.value == 3 then
-            return getInt(2, 4)
+            return getInt(2, 3)
         end
     end
 
     return 0
 end
 
-function onInstalled(seed, rarity)
+function onInstalled(seed, rarity, permanent)
 
-    historySize = getHistorySize(seed, rarity)
+    historySize = getHistorySize(seed, rarity, permanent)
 
     if onServer() then
         tradingData = RingBuffer(math.max(historySize, 1))
@@ -96,7 +96,7 @@ function onInstalled(seed, rarity)
 
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -128,7 +128,7 @@ function getPrice(seed, rarity)
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     local lines = {}
 
     if seePrices(seed, rarity) then
@@ -141,7 +141,7 @@ function getTooltipLines(seed, rarity)
     return lines
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     local lines =
     {
         {ltext = "View trading offers of all stations of the sector"%_t}
@@ -237,12 +237,12 @@ function updateTradingRoutes()
 
 end
 
-function getData(playerIndex)
+function getData()
     local sellable, buyable = gatherData()
     tradingData.data[tradingData.last] = {sellable = sellable, buyable = buyable}
     updateTradingRoutes()
 
-    invokeClientFunction(Player(playerIndex), "setData", sellable, buyable, routes)
+    invokeClientFunction(Player(callingPlayer), "setData", sellable, buyable, routes)
 end
 
 
@@ -291,7 +291,7 @@ function initUI()
 end
 
 function onShowWindow()
-    invokeServerFunction("getData", Player().index)
+    invokeServerFunction("getData")
 end
 
 function setData(sellable_received, buyable_received, routes_received)

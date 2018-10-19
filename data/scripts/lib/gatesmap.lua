@@ -101,10 +101,14 @@ function GatesMap:potentialConnections(a, sectors)
             dirvec.y = other.y - a.y
             normalize_ip(dirvec)
 
-            if dot(dirvec, dir) < threshold then goto continue end
+            if dot(dirvec, dir) < threshold then
+                goto continue
+            end
 
             -- check if it's not crossing the ring
-            if passageMap:insideRing(a.x, a.y) ~= passageMap:insideRing(other.x, other.y) then goto continue end
+            if passageMap:insideRing(a.x, a.y) ~= passageMap:insideRing(other.x, other.y) then
+                goto continue
+            end
 
             -- find minimum
             local dist = distance2(a, other)
@@ -137,7 +141,10 @@ function GatesMap:potentialConnections(a, sectors)
     return connections
 end
 
-function GatesMap:hasGates(specs)
+function GatesMap:hasGates(x, y)
+
+    local specs = self.specs
+    specs:initialize(x, y, self.serverSeed)
 
     if Galaxy and Galaxy() then
         local player = Galaxy():findFaction(1)
@@ -169,15 +176,13 @@ function GatesMap:getConnectedSectors(from)
             local d2 = dx * dx + dy * dy
             if d2 > range * range then goto continue end
 
-            -- check if sector has content
+            -- check if sector has gates
             local x = from.x + dx
             local y = from.y + dy
 
-            self.specs:initialize(x, y, self.serverSeed)
-
-            if not self:hasGates(self.specs) then goto continue end
-
-            table.insert(sectors, {x=x, y=y})
+            if self:hasGates(x, y) then
+                table.insert(sectors, {x=x, y=y})
+            end
 
             ::continue::
         end
@@ -187,6 +192,7 @@ function GatesMap:getConnectedSectors(from)
     local connected = {}
 
     local outgoing = self:potentialConnections(from, sectors)
+
     for _, target in pairs(outgoing) do
 
         local incoming = self:potentialConnections(target, sectors)

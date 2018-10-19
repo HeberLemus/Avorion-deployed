@@ -106,11 +106,12 @@ end
 
 function addItemToMainSelection(item)
     if not item then return end
+    if not item.item then return end
 
     if item.item.stackable then
         -- find the item and increase the amount
         for k, v in pairs(inventory:getItems()) do
-            if v.item == item.item then
+            if v.item and v.item == item.item then
                 v.amount = v.amount + 1
 
                 inventory:remove(k)
@@ -206,18 +207,19 @@ function onInventoryClicked(selectionIndex, kx, ky, item, button)
 end
 
 function refreshButton()
-    local items = required:getItems()
-    button.active = (tablelength(items) == 3)
+    local requiredItems = required:getItems()
+    button.active = (tablelength(requiredItems) == 3)
 
-    if tablelength(items) ~= 3 then
+    if tablelength(requiredItems) ~= 3 then
         button.tooltip = "Place at least 3 items for research!"%_t
     else
         button.tooltip = "Transform into a new item"%_t
     end
 
-    for _, items in pairs({items, optional:getItems()}) do
+    for _, items in pairs({requiredItems, optional:getItems()}) do
         for _, item in pairs(items) do
-            if item.item.itemType ~= InventoryItemType.TurretTemplate
+            if item.item
+                and item.item.itemType ~= InventoryItemType.TurretTemplate
                 and item.item.itemType ~= InventoryItemType.SystemUpgrade
                 and item.item.itemType ~= InventoryItemType.Turret then
 
@@ -414,18 +416,22 @@ function onClickResearch()
     local itemIndices = {}
 
     for _, item in pairs(required:getItems()) do
-        table.insert(items, item.item)
+        if item.item then
+            table.insert(items, item.item)
 
-        local amount = itemIndices[item.index] or 0
-        amount = amount + 1
-        itemIndices[item.index] = amount
+            local amount = itemIndices[item.index] or 0
+            amount = amount + 1
+            itemIndices[item.index] = amount
+        end
     end
     for _, item in pairs(optional:getItems()) do
-        table.insert(items, item.item)
+        if item.item then
+            table.insert(items, item.item)
 
-        local amount = itemIndices[item.index] or 0
-        amount = amount + 1
-        itemIndices[item.index] = amount
+            local amount = itemIndices[item.index] or 0
+            amount = amount + 1
+            itemIndices[item.index] = amount
+        end
     end
 
     if not checkRarities(items) then
@@ -437,6 +443,7 @@ function onClickResearch()
 end
 
 function research(itemIndices)
+    if not itemIndices then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end

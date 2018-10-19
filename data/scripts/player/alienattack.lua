@@ -7,7 +7,6 @@ require ("stringutility")
 require ("randomext")
 require ("utility")
 require ("galaxy")
-
 local ShipGenerator = require ("shipgenerator")
 local Xsotan = require("story/xsotan")
 

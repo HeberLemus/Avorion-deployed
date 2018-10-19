@@ -11,10 +11,16 @@ interestingEntities = {}
 detections = {}
 highlightRange = 0
 
+local entityId
+
+-- this variable gets reset on the client every time the player changes sectors because the script is recreated
+local chatMessageDisplayed = false
+
+
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local detections = {"entity/claim.lua"}
@@ -28,6 +34,7 @@ function getBonuses(seed, rarity)
     end
 
     local highlightRange = 0
+
     if rarity.value >= RarityType.Rare then
         highlightRange = 1000 + math.random() * 500
     end
@@ -43,43 +50,73 @@ function getBonuses(seed, rarity)
     return detections, highlightRange
 end
 
-function onInstalled(seed, rarity)
-    if onClient() then
+function onInstalled(seed, rarity, permanent)
+end
+
+function onUninstalled(seed, rarity, permanent)
+end
+
+
+if onClient() then
+
+function onInstalled(seed, rarity, permanent)
+    if Player() then
         Player():registerCallback("onPreRenderHud", "onPreRenderHud")
+        Player():registerCallback("onShipChanged", "detectAndSignal")
     end
 
-    detections, highlightRange = getBonuses(seed, rarity)
-    detect()
+    detections, highlightRange = getBonuses(seed, rarity, permanent)
+    detectAndSignal()
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
-function detect()
+function onDelete()
+    if entityId then
+        removeShipProblem("ValuablesDetector", entityId)
+    end
+end
 
-    -- check for valuables and send a signal
-    interestingEntities = {}
-    local entities = {Sector():getEntitiesByComponent(ComponentType.Scripts)}
-    for _, entity in pairs(entities) do
-        for _, script in pairs(detections) do
-            if entity:hasScript(script) then
-                table.insert(interestingEntities, entity)
-                break
+function detectAndSignal()
+
+    if Player().craftIndex == Entity().index then
+        -- check for valuables and send a signal
+        interestingEntities = {}
+        local entities = {Sector():getEntitiesByComponent(ComponentType.Scripts)}
+        for _, entity in pairs(entities) do
+            for _, script in pairs(detections) do
+                if entity:hasScript(script) then
+                    table.insert(interestingEntities, entity)
+                    break
+                end
             end
         end
     end
 
-    if onServer() and #interestingEntities > 0 then
-        local player = Player()
-        if player then
-            player:sendChatMessage("Object Detector"%_t, 3, "Valuable objects detected."%_t)
+    signal()
+
+end
+
+function signal()
+
+    if Player().craftIndex == Entity().index then
+        if #interestingEntities > 0 then
+            if not chatMessageDisplayed then
+                displayChatMessage("Valuable objects detected."%_t, "Object Detector"%_t, 3)
+                chatMessageDisplayed = true
+            end
+
+            entityId = Entity().id
+            addShipProblem("ValuablesDetector", entityId, "Valuable objects detected."%_t, "data/textures/icons/hazard-sign.png", ColorRGB(0, 1, 1))
         end
     end
+
 end
 
 function onSectorChanged()
-    detect()
+    detectAndSignal()
 end
 
 function onPreRenderHud()
@@ -102,11 +139,12 @@ function onPreRenderHud()
 
         if d <= highlightRange * highlightRange then
             renderer:renderEntityTargeter(entity, ColorRGB(1, 1, 1));
-            renderer:renderEntityArrow(entity, 30, 10, 250, ColorRGB(1, 1, 1), 0);
+            renderer:renderEntityArrow(entity, 30, 10, 250, ColorRGB(1, 1, 1));
         end
     end
 
     renderer:display()
+end
 end
 
 function getName(seed, rarity)
@@ -117,23 +155,23 @@ function getIcon(seed, rarity)
     return "data/textures/icons/movement-sensor.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     local detections, highlightRange = getBonuses(seed, rarity)
     highlightRange = math.min(highlightRange, 1500)
 
-    return (highlightRange * 0.0002 * 1000 * 1000 * 1000) + (#detections * 15 * 1000 * 1000)
+    return (highlightRange * 0.0005 * 1000 * 1000 * 1000) + (#detections * 15 * 1000 * 1000)
 end
 
 function getPrice(seed, rarity)
     local detections, range = getBonuses(seed, rarity)
     range = math.min(range, 1500)
 
-    local price = #detections * 300 + range * 0.75;
+    local price = #detections * 250 + range * 1.5;
 
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     local texts = {}
 
     local _, range = getBonuses(seed, rarity)
@@ -152,7 +190,7 @@ function getTooltipLines(seed, rarity)
     return texts
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     local texts = {}
 
     if rarity.value == RarityType.Petty then

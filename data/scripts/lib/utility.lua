@@ -400,3 +400,19 @@ function makeReadOnlyTable(table)
      __metatable = false
    });
 end
+
+function nonils(...)
+    for _, var in pairs({...}) do
+        if var == nil then return false end
+    end
+
+    return true
+end
+
+function anynils(...)
+    for _, var in pairs({...}) do
+        if var == nil then return true end
+    end
+
+    return false
+end

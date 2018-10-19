@@ -109,17 +109,6 @@ function initializePlayer(player)
     Galaxy():setFactionRelations(faction, player, 75000)
     player:setValue("start_ally", faction.index)
 
-    -- try placing the player closely near the home sector of his first ally
-    local ax, ay = faction:getHomeSectorCoordinates()
-    local specs = SectorSpecifics()
-    specs:initialize(ax, ay, Server().seed)
-    home = specs:findFreeSector(random, ax, ay, 3, 8, Server().seed)
-    if home then
-        player:setHomeSectorCoordinates(home.x, home.y)
-        player:setRespawnSectorCoordinates(home.x, home.y)
-    end
-
-
     local random = Random(getSectorSeed(home.x, home.y) + player.index)
 
     if server.difficulty == Difficulty.Beginner then
@@ -133,15 +122,13 @@ function initializePlayer(player)
     -- create turret generator
     local dps, tech = Balancing_GetSectorWeaponDPS(450, 0)
     local turret = InventoryTurret(GenerateTurretTemplate(random:createSeed(), WeaponType.ChainGun, dps, tech, Rarity(RarityType.Uncommon), Material(MaterialType.Iron)))
-	turret.automatic = true
-    player:getInventory():add(turret)
-    player:getInventory():add(turret)
+    player:getInventory():add(turret, false)
+    player:getInventory():add(turret, false)
 
     local dps, tech = Balancing_GetSectorMiningDPS(450, 0)
     local turret = InventoryTurret(GenerateTurretTemplate(random:createSeed(), WeaponType.MiningLaser, dps, tech, Rarity(RarityType.Uncommon), Material(MaterialType.Iron)))
-	turret.automatic = true
-    player:getInventory():add(turret)
-    player:getInventory():add(turret)
+    player:getInventory():add(turret, false)
+    player:getInventory():add(turret, false)
 
     player:createShipStyle("TestStyle")
 

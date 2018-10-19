@@ -2,6 +2,7 @@ package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
 local PlanGenerator = require("plangenerator")
+require("stringutility")
 
 function create(item, rarity)
 
@@ -9,7 +10,7 @@ function create(item, rarity)
 
     item.stackable = true
     item.depleteOnUse = true
-    item.name = "Energy Suppressor Satellite"
+    item.name = "Energy Suppressor Satellite"%_t
     item.price = 100000
     item.icon = "data/textures/icons/satellite.png"
     item.rarity = rarity
@@ -31,8 +32,8 @@ function create(item, rarity)
     tooltip:addLine(line)
 
     local line = TooltipLine(18, 14)
-    line.ltext = "Time"
-    line.rtext = "10h"
+    line.ltext = "Time"%_t
+    line.rtext = "10h"%_t
     line.icon = "data/textures/icons/sands-of-time.png"
     line.iconColor = ColorRGB(0.8, 0.8, 0.8)
     tooltip:addLine(line)
@@ -42,22 +43,22 @@ function create(item, rarity)
     tooltip:addLine(line)
 
     local line = TooltipLine(18, 14)
-    line.ltext = "Can be deployed by the player."
+    line.ltext = "Can be deployed by the player."%_t
     tooltip:addLine(line)
 
     local line = TooltipLine(14, 14)
     tooltip:addLine(line)
 
     local line = TooltipLine(18, 14)
-    line.ltext = "Deploy this satellite in a sector"
+    line.ltext = "Deploy this satellite in a sector"%_t
     tooltip:addLine(line)
 
     local line = TooltipLine(18, 14)
-    line.ltext = "to suppress energy signatures"
+    line.ltext = "to suppress energy signatures"%_t
     tooltip:addLine(line)
 
     local line = TooltipLine(18, 14)
-    line.ltext = "and to hide any activity from bandits."
+    line.ltext = "and to hide any activity from persecutors."%_t
     tooltip:addLine(line)
 
 

@@ -175,6 +175,8 @@ function CivilShip.dumpCargo()
         return
     end
 
+    if anynils(callingPlayer) then return end
+
     local ship = Entity()
     local cargos = ship:getCargos()
 
@@ -189,6 +191,7 @@ end
 
 function CivilShip.worsenRelations(delta)
     delta = delta or -15000
+    if delta > 0 then return end
     if not callingPlayer then return end
 
     if onClient() then
@@ -259,6 +262,8 @@ function CivilShip.makeHomeSectorDialog()
     local entity = Entity()
 
     local faction = Faction(entity.factionIndex)
+    if not faction then return {} end
+
     local x, y = faction:getHomeSectorCoordinates()
 
     local dialog = {}
@@ -283,11 +288,13 @@ function CivilShip.makeHomeSectorDialog()
     dialog.onStart = "postHomeSector"
     dialog.onEnd = "restart"
 
-    return dialog;
+    return dialog
 end
 
 function CivilShip.postHomeSector()
     local faction = Faction()
+    if not faction then return end
+
     local x, y = faction:getHomeSectorCoordinates()
 
     local name = faction.name

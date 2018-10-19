@@ -474,6 +474,7 @@ function StationFounder.onCancelTransformationButtonPress(button)
 end
 
 function StationFounder.foundFactory(goodName, productionIndex)
+    if anynils(goodName, productionIndex) then return end
 
     local buyer, ship, player = checkEntityInteractionPermissions(Entity(), AlliancePrivilege.FoundStations)
     if not buyer then return end
@@ -522,6 +523,8 @@ function StationFounder.foundFactory(goodName, productionIndex)
 end
 
 function StationFounder.foundStation(selected)
+
+    if anynils(selected) then return end
 
     local buyer, ship, player = checkEntityInteractionPermissions(Entity(), AlliancePrivilege.FoundStations)
     if not buyer then return end
@@ -656,3 +659,4 @@ function StationFounder.onCloseWindow()
     warnWindow:hide()
 end
 
+if not pcall(require, 'mods.DockBuilder.scripts.entity.stationfounder') then print('Mod: DockBuilder, failed to extend stationfounder.lua!') end

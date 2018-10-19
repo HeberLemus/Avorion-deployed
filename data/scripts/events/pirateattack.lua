@@ -291,6 +291,10 @@ function PirateAttack.spawnDefender(faction, amount)
 end
 
 
+function PirateAttack.getUpdateInterval()
+    return 15
+end
+
 function PirateAttack.onPiratesGenerated(generated)
 
     for _, ship in pairs(generated) do
@@ -360,6 +364,7 @@ function PirateAttack.endEvent()
             local player = Player(i)
 
             player:sendChatMessage(faction.name, 0, getRandomEntry(messages))
+            --Mod Warning - Better Enemies removes message
             player:receive("Received %1% credits for defeating a pirate attack."%_T, reward)
             Galaxy():changeFactionRelations(player, faction, reputation)
 

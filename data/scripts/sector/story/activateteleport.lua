@@ -6,16 +6,15 @@ require("randomext")
 local Balancing = require ("galaxy")
 local PlanGenerator = require("plangenerator")
 local SectorSpecifics = require("sectorspecifics")
+local Placer = require("placer")
+local Xsotan = require("story/xsotan")
 
 -- Don't remove or alter the following comment, it tells the game the namespace this script lives in. If you remove it, the script will break.
 -- namespace ActivateTeleport
 ActivateTeleport = {}
 
 local activationDistance = 150
-
-function ActivateTeleport.initialize()
-
-end
+local spawned
 
 if onServer() then
 function ActivateTeleport.getUpdateInterval()
@@ -93,42 +92,68 @@ function ActivateTeleport.updateServer()
     end
 
     if teleportersOccupied == 8 then
-        -- if yes, activate the wormhole
-        local x, y = Sector():getCoordinates()
-        local own = vec2(x, y)
-        local d = length(own)
-
-        local distanceInside = 5;
-
-        -- find a free destination inside the ring
-        local destination = nil
-        while not destination do
-            local d = own / d * (Balancing.BlockRingMin - distanceInside)
-
-            local specs = SectorSpecifics()
-            local target = specs:findFreeSector(random(), math.floor(d.x), math.floor(d.y), 1, distanceInside - 1, Server().seed)
-
-            if target then
-                destination = target
-            else
-                distanceInside = distanceInside + 1
-            end
-        end
-
-        local desc = WormholeDescriptor()
-        desc:addComponent(ComponentType.DeletionTimer)
-
-        local cpwormhole = desc:getComponent(ComponentType.WormHole)
-        cpwormhole.color = ColorRGB(1, 0, 0)
-        cpwormhole:setTargetCoordinates(destination.x, destination.y)
-        cpwormhole.visualSize = 100
-        cpwormhole.passageSize = 150
-        cpwormhole.oneWay = false
-
-        local wormHole = Sector():createEntity(desc)
-
-        DeletionTimer(wormHole.index).timeLeft = 20 * 60 -- open for 20 minutes
+        ActivateTeleport.activate()
     end
+end
+
+function ActivateTeleport.activate()
+    -- if yes, activate the wormhole
+    local x, y = Sector():getCoordinates()
+    local own = vec2(x, y)
+    local d = length(own)
+
+    local distanceInside = 5;
+
+    -- find a free destination inside the ring
+    local destination = nil
+    while not destination do
+        local d = own / d * (Balancing.BlockRingMin - distanceInside)
+
+        local specs = SectorSpecifics()
+        local target = specs:findFreeSector(random(), math.floor(d.x), math.floor(d.y), 1, distanceInside - 1, Server().seed)
+
+        if target then
+            destination = target
+        else
+            distanceInside = distanceInside + 1
+        end
+    end
+
+    local desc = WormholeDescriptor()
+    desc:addComponent(ComponentType.DeletionTimer)
+
+    local cpwormhole = desc:getComponent(ComponentType.WormHole)
+    cpwormhole.color = ColorRGB(1, 0, 0)
+    cpwormhole:setTargetCoordinates(destination.x, destination.y)
+    cpwormhole.visualSize = 100
+    cpwormhole.passageSize = 150
+    cpwormhole.oneWay = false
+
+    local wormHole = Sector():createEntity(desc)
+
+    DeletionTimer(wormHole.index).timeLeft = 35 * 60 -- open for 35 minutes
+
+    if not spawned then
+        spawned = true
+
+        deferredCallback(6, "spawnEnemies", 3, 3)
+        deferredCallback(30, "spawnEnemies", 5, 5)
+        deferredCallback(60, "spawnEnemies", 3, 20)
+        deferredCallback(90, "spawnEnemies", 2, 50)
+    end
+end
+
+function ActivateTeleport.spawnEnemies(amount, scale)
+
+    local enemies = {}
+    for i = 1, amount do
+        local enemy = Xsotan.createShip(Matrix(), scale)
+        enemy:setValue("untransferrable", true)
+
+        table.insert(enemies, enemy)
+    end
+
+    Placer.resolveIntersections(enemies)
 end
 
 end -- onServer()

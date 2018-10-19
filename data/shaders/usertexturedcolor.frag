@@ -1,0 +1,13 @@
+#include "version.inl"
+
+uniform sampler2D diffuseTexture;
+uniform vec4 color;
+
+in vec2 texCoord;
+
+void main()
+{
+    vec4 texColor = texture(diffuseTexture, vec2(texCoord.x, 1.0 - texCoord.y));
+
+    outFragColor = color * texColor;
+}

@@ -3,7 +3,7 @@ function getFactionWarSideVariableName(faction)
     faction = faction or Faction()
 
     local a = faction.index
-    local b = faction:getValue("enemy_faction")
+    local b = faction:getValue("enemy_faction") or -1
     local enemy = b
 
     if a > b then a, b = b, a end

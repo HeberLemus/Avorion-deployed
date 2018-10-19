@@ -7,7 +7,7 @@ require ("utility")
 FixedEnergyRequirement = true
 
 function onInstalled()
-    if onClient() then
+    if onClient() and Player() then
         Player():registerCallback("onStartDialog", "onStartDialog")
     end
 end
@@ -37,7 +37,7 @@ function onBlock(entityId)
 
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -48,7 +48,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/smugglerblock.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     return 250 * 1000 * 1000
 end
 
@@ -56,14 +56,14 @@ function getPrice(seed, rarity)
     return 5000
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     return
     {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+--        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity, permanent), icon = "data/textures/icons/turret.png"}
     }
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "This system was built by Bottan's chief engineer."%_t, rtext = "", icon = ""},

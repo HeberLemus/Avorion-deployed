@@ -24,6 +24,7 @@ local AsyncPirateGenerator = require("asyncpirategenerator")
 local AsyncShipGenerator = require("asyncshipgenerator")
 local FighterGenerator = require("fightergenerator")
 local TorpedoGenerator = require("torpedogenerator")
+local Scientist = require ("story/scientist")
 
 local window
 local scriptsWindow
@@ -118,6 +119,7 @@ function initUI()
     tab:createButton(ButtonRect(), "Dislike", "onDislikePressed")
     tab:createButton(ButtonRect(), "Damage", "onDamagePressed")
     tab:createButton(ButtonRect(), "Title", "onTitlePressed")
+    tab:createButton(ButtonRect(), "Transform Turrets", "onTransformTurretsPressed")
     tab:createButton(ButtonRect(), "Faction Index", "onFactionIndexPressed")
 
     local tab = tabbedWindow:createTab("Inventory", "data/textures/icons/greek-temple.png", "Player Commands")
@@ -126,12 +128,25 @@ function initUI()
     tab:createButton(ButtonRect(), "Player Values", "onPlayerValuesButtonPressed")
     tab:createButton(ButtonRect(), "Reset Money", "onResetMoneyButtonPressed")
     tab:createButton(ButtonRect(), "Guns Guns Guns", "onGunsButtonPressed")
+    tab:createButton(ButtonRect(), "CoAx Guns Guns Guns", "onCoaxialGunsButtonPressed")
     tab:createButton(ButtonRect(), "Gimme Systems", "onSystemsButtonPressed")
     tab:createButton(ButtonRect(), "Mining Lasers", "onMiningLasersButtonPressed")
     tab:createButton(ButtonRect(), "Clear Inventory", "onClearInventoryButtonPressed")
     tab:createButton(ButtonRect(), "Quest Reward", "onQuestRewardButtonPressed")
-    tab:createButton(ButtonRect(), "Mission Upgrades", "onKeysButtonPressed")
     tab:createButton(ButtonRect(), "Disable Events", "onDisableEventsButtonPressed")
+
+    local tab = tabbedWindow:createTab("Upgrades", "data/textures/icons/circuitry.png", "Upgrades")
+    numButtons = 0
+
+    tab:createButton(ButtonRect(), "Clear Inventory", "onClearInventoryButtonPressed")
+    tab:createButton(ButtonRect(), "Mission Upgrades", "onKeysButtonPressed")
+
+    systemButtons = {}
+    for _, script in pairs(UpgradeGenerator.scripts) do
+        local name = script:split("/")[4]:split(".")[1]
+        local button = tab:createButton(ButtonRect(), name, "onSystemUpgradeButtonPressed")
+        table.insert(systemButtons, {button = button, script = script});
+    end
 
     local tab = tabbedWindow:createTab("Sector", "data/textures/icons/compass.png", "Sector Commands")
     numButtons = 0
@@ -197,12 +212,14 @@ function initUI()
     tab:createButton(ButtonRect(), "Trader", "onSpawnTraderButtonPressed")
     tab:createButton(ButtonRect(), "Freighter", "onSpawnFreighterButtonPressed")
     tab:createButton(ButtonRect(), "Miner", "onSpawnMinerButtonPressed")
+    tab:createButton(ButtonRect(), "Xsotan Squad", "onSpawnXsotanSquadButtonPressed")
     tab:createButton(ButtonRect(), "Xsotan Carrier", "onSpawnXsotanCarrierButtonPressed")
     tab:createButton(ButtonRect(), "Defenders", "onSpawnDefendersButtonPressed")
     tab:createButton(ButtonRect(), "Battle", "onSpawnBattleButtonPressed")
     tab:createButton(ButtonRect(), "Deferred Battle", "onSpawnDeferredBattleButtonPressed")
     tab:createButton(ButtonRect(), "Fleet", "onSpawnFleetButtonPressed")
     tab:createButton(ButtonRect(), "Raiders", "onPersecutorsButtonPressed")
+    tab:createButton(ButtonRect(), "Crew Transport", "onCrewTransportButtonPressed")
 
 
     local tab = tabbedWindow:createTab("Factory Spawn", "data/textures/icons/cog.png", "Spawn Factory")
@@ -230,10 +247,6 @@ function initUI()
 
     local tab = tabbedWindow:createTab("Missions", "data/textures/icons/treasure-map.png", "Missions")
     numButtons = 0
-    tab:createButton(ButtonRect(), "Smuggler Retaliation", "onSmugglerRetaliationButtonPressed")
-    tab:createButton(ButtonRect(), "Exodus Beacon", "onExodusBeaconButtonPressed")
-    tab:createButton(ButtonRect(), "Exodus Corner Points", "onExodusPointsButtonPressed")
-    tab:createButton(ButtonRect(), "Exodus Final Beacon", "onExodusFinalBeaconButtonPressed")
     tab:createButton(ButtonRect(), "Distress Call", "onDistressCallButtonPressed")
     tab:createButton(ButtonRect(), "Fake Distress Call", "onFakeDistressCallButtonPressed")
     tab:createButton(ButtonRect(), "Pirate Attack", "onPirateAttackButtonPressed")
@@ -242,12 +255,17 @@ function initUI()
     tab:createButton(ButtonRect(), "Headhunter Attack", "onHeadhunterAttackButtonPressed")
     tab:createButton(ButtonRect(), "Search and Rescue Call", "onSearchAndRescueButtonPressed")
     tab:createButton(ButtonRect(), "Progress Brakers", "onProgressBrakersButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn Swoks", "onSpawnSwoksButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn The AI", "onSpawnTheAIButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn Smuggler", "onSpawnSmugglerButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn Scientist", "onSpawnScientistButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn The 4", "onSpawnThe4ButtonPressed")
-    tab:createButton(ButtonRect(), "Spawn Guardian", "onSpawnGuardianButtonPressed")
+    tab:createButton(ButtonRect(), "Smuggler Retaliation", "onSmugglerRetaliationButtonPressed")
+    tab:createButton(ButtonRect(), "Exodus Beacon", "onExodusBeaconButtonPressed")
+    tab:createButton(ButtonRect(), "Exodus Corner Points", "onExodusPointsButtonPressed")
+    tab:createButton(ButtonRect(), "Exodus Final Beacon", "onExodusFinalBeaconButtonPressed")
+    tab:createButton(ButtonRect(), "Research Satellite", "onResearchSatelliteButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: Swoks", "onSpawnSwoksButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: The AI", "onSpawnTheAIButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: Smuggler", "onSpawnSmugglerButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: Scientist", "onSpawnScientistButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: The 4", "onSpawnThe4ButtonPressed")
+    tab:createButton(ButtonRect(), "Boss: Guardian", "onSpawnGuardianButtonPressed")
 
 
 
@@ -522,6 +540,16 @@ function onExodusFinalBeaconButtonPressed()
     beacon:addScript("story/exodustalkbeacon.lua")
 end
 
+function onResearchSatelliteButtonPressed()
+    if onClient() then
+        invokeServerFunction("onResearchSatelliteButtonPressed")
+        return
+    end
+
+    -- if not, create a new one
+    Scientist.createSatellite(Matrix())
+end
+
 function onDistressCallButtonPressed()
     if onClient() then
         invokeServerFunction("onDistressCallButtonPressed")
@@ -608,6 +636,41 @@ function onPersecutorsButtonPressed()
         generator:createRaider(matrix)
     end
 end
+
+local transportData
+
+function onCrewTransportButtonPressed()
+    if onClient() then
+        invokeServerFunction("onCrewTransportButtonPressed")
+        return
+    end
+
+    local player = Player(callingPlayer)
+    local playerShip = player.craft
+
+    if not playerShip then return end
+
+    local generator = AsyncShipGenerator(nil, finalizeCrewTransport)
+
+    local faction = Galaxy():getNearestFaction(Sector():getCoordinates())
+
+    local dir = random():getDirection()
+    local position = MatrixLookUpPosition(-dir, random():getDirection(), dir * 3000)
+    generator:createFreighterShip(faction, position)
+
+    transportData = {}
+    transportData.craft = playerShip.index
+    transportData.crew = playerShip.minCrew
+end
+
+function finalizeCrewTransport(ship)
+    transportData = transportData or {}
+
+    ship:addScriptOnce("crewtransport.lua", transportData.craft or Uuid(), transportData.crew or Crew())
+
+    transportData = nil
+end
+
 
 function onStolenChecked(index, checked)
 end
@@ -967,6 +1030,60 @@ function onSpawnMinerButtonPressed()
     local pos = position + dir * 100
     local generator = AsyncShipGenerator()
     generator:createMiningShip(faction, MatrixLookUpPosition(right, up, pos))
+
+end
+
+function onSpawnXsotanSquadButtonPressed()
+    if onClient() then
+        invokeServerFunction("onSpawnXsotanSquadButtonPressed")
+        return
+    end
+
+    local galaxy = Galaxy()
+
+    local faction = Xsotan.getFaction()
+
+    local player = Player()
+    local others = Galaxy():getNearestFaction(Sector():getCoordinates())
+    Galaxy():changeFactionRelations(faction, player, -200000)
+    Galaxy():changeFactionRelations(faction, others, -200000)
+
+    -- create the enemies
+    local dir = normalize(vec3(getFloat(-1, 1), getFloat(-1, 1), getFloat(-1, 1)))
+    local up = vec3(0, 1, 0)
+    local right = normalize(cross(dir, up))
+    local pos = dir * 1500
+
+    local volume = Balancing_GetSectorShipVolume(faction:getHomeSectorCoordinates());
+    local volumes = {
+                {size=1, title="Xsotan Scout"%_t},
+                {size=1, title="Xsotan Scout"%_t},
+                {size=2, title="Xsotan Scout"%_t},
+                {size=3, title="Xsotan Ship"%_t},
+                {size=3, title="Xsotan Ship"%_t},
+                {size=5, title="Big Xsotan Ship"%_t},
+                {size=3, title="Xsotan Ship"%_t},
+                {size=3, title="Xsotan Ship"%_t},
+                {size=2, title="Xsotan Scout"%_t},
+                {size=1, title="Xsotan Scout"%_t},
+                {size=1, title="Xsotan Scout"%_t},
+            }
+
+    for _, p in pairs(volumes) do
+
+        local enemy = Xsotan.createShip(MatrixLookUpPosition(-dir, up, pos), p.size)
+        enemy.title = p.title
+
+        local distance = enemy:getBoundingSphere().radius + 20
+
+        pos = pos + right * distance
+
+        enemy.translation = dvec3(pos.x, pos.y, pos.z)
+
+        pos = pos + right * distance + 20
+
+        -- patrol.lua takes care of setting aggressive
+    end
 
 end
 
@@ -1778,6 +1895,72 @@ function onGunsButtonPressed()
 
 end
 
+function onCoaxialGunsButtonPressed()
+    if onClient() then
+        invokeServerFunction("onCoaxialGunsButtonPressed")
+        return
+    end
+
+    local player = Faction()
+
+    local weaponTypes = {}
+    weaponTypes[WeaponType.ChainGun] = 1
+    weaponTypes[WeaponType.PointDefenseChainGun] = 1
+    weaponTypes[WeaponType.Laser] = 1
+    weaponTypes[WeaponType.MiningLaser] = 1
+    weaponTypes[WeaponType.SalvagingLaser] = 1
+    weaponTypes[WeaponType.PlasmaGun] = 1
+    weaponTypes[WeaponType.RocketLauncher] = 1
+    weaponTypes[WeaponType.Cannon] = 1
+    weaponTypes[WeaponType.RailGun] = 1
+    weaponTypes[WeaponType.RepairBeam] = 1
+    weaponTypes[WeaponType.Bolter] = 1
+    weaponTypes[WeaponType.LightningGun] = 1
+    weaponTypes[WeaponType.TeslaGun] = 1
+    weaponTypes[WeaponType.ForceGun] = 1
+    weaponTypes[WeaponType.PulseCannon] = 1
+    weaponTypes[WeaponType.AntiFighter] = 1
+    weaponTypes[WeaponType.PointDefenseLaser] = 1
+
+    local rarities = {}
+    rarities[RarityType.Petty] = 1
+    rarities[RarityType.Common] = 1
+    rarities[RarityType.Uncommon] = 1
+    rarities[RarityType.Rare] = 1
+    rarities[RarityType.Exceptional] = 1
+    rarities[RarityType.Exotic] = 1
+    rarities[RarityType.Legendary] = 1
+
+
+    local materials = {}
+    materials[0] = 1
+    materials[1] = 1
+    materials[2] = 1
+    materials[3] = 1
+    materials[4] = 1
+    materials[5] = 1
+    materials[6] = 1
+
+    local dps, tech = Balancing_GetSectorWeaponDPS(Sector():getCoordinates())
+
+    local x, y = Sector():getCoordinates()
+
+    for i = 1, 15 do
+
+        local rarity = selectByWeight(random(), rarities)
+        local material = selectByWeight(random(), materials)
+        local weaponType = selectByWeight(random(), weaponTypes)
+
+        local turret = TurretGenerator.generate(x, y, 0, Rarity(rarity), weaponType, Material(material))
+        turret.coaxial = true
+
+        for j = 1, 5 do
+            player:getInventory():add(InventoryTurret(turret))
+        end
+    end
+
+end
+
 function onSystemsButtonPressed()
     if onClient() then
         invokeServerFunction("onSystemsButtonPressed")
@@ -1789,6 +1972,24 @@ function onSystemsButtonPressed()
     for i = 1, 15 do
         Faction():getInventory():add(UpgradeGenerator.generateSystem())
     end
+end
+
+function onSystemUpgradeButtonPressed(arg)
+    if onClient() then
+        local button = arg
+        for _, p in pairs(systemButtons) do
+            if button.index == p.button.index then
+                invokeServerFunction("onSystemUpgradeButtonPressed", p.script)
+                break
+            end
+        end
+        return
+    end
+
+    rarityCounter = (rarityCounter or 0) + 1
+    if rarityCounter > 5 then rarityCounter = -1 end
+
+    Faction():getInventory():add(SystemUpgradeTemplate(arg, Rarity(rarityCounter), random():createSeed()))
 end
 
 function onMiningLasersButtonPressed()
@@ -2350,6 +2551,33 @@ function onTitlePressed()
     if onClient() then
         invokeServerFunction("onTitlePressed")
         return
+    end
+end
+
+function onTransformTurretsPressed()
+    if onClient() then
+        invokeServerFunction("onTransformTurretsPressed")
+        return
+    end
+
+    local fighter = FighterGenerator.generateArmed(Sector():getCoordinates())
+
+    local base = TurretDesignPart()
+    base:setPlan(fighter.plan)
+
+    local body = TurretDesignPart()
+    body:setPlan(fighter.plan)
+
+    local barrel = TurretDesignPart()
+    barrel:setPlan(fighter.plan)
+
+    local design = TurretDesign()
+    design:setMoveBase(base)
+    design:setMoveBody(body)
+    design:setMoveBarrels(barrel)
+
+    for _, block in pairs(Plan():getBlocksByType(BlockType.TurretBase)) do
+        TurretBases():setDesign(block, design)
     end
 end
 

@@ -63,7 +63,7 @@ function SectorTemplate.generate(player, seed, x, y)
 
     generator:createGates()
 
-    Sector():addScript("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
+    Sector():addScriptOnce("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
     Sector():addScript("data/scripts/sector/respawnresourceasteroids.lua")
 
     generator:addAmbientEvents()

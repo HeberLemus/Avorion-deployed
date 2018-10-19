@@ -179,6 +179,7 @@ function sendFactions()
 end
 
 function sell(receiverIndex)
+    if anynils(receiverIndex) then return end
 
     local owner, self = checkEntityInteractionPermissions(Entity(), AlliancePrivilege.ManageStations)
     if not owner then return end

@@ -38,7 +38,7 @@ function Backup.onDamaged(selfIndex, amount, inflictor)
         local station = Entity(selfIndex)
         local faction = Faction(station.factionIndex)
 
-        if faction.isAIFaction then
+        if faction and faction.isAIFaction then
 
             local stationPos = station.translationf
 

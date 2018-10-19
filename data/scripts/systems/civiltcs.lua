@@ -8,19 +8,27 @@ require ("utility")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getNumTurrets(seed, rarity)
-    return math.max(1, rarity.value * 12)
+function getNumBonusTurrets(seed, rarity, permanent)
+    if permanent then
+        return math.max(1, math.floor((rarity.value + 1) / 2))
+    end
+
+    return 0
 end
 
-function onInstalled(seed, rarity)
-    addMultiplyableBias(StatsBonuses.UnarmedTurrets, getNumTurrets(seed, rarity))
+function getNumTurrets(seed, rarity, permanent)
+    return math.max(1, rarity.value * 12) + getNumBonusTurrets(seed, rarity, permanent)
 end
 
-function onUninstalled(seed, rarity)
+function onInstalled(seed, rarity, permanent)
+    addMultiplyableBias(StatsBonuses.UnarmedTurrets, getNumTurrets(seed, rarity, permanent))
+end
+
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
-    return "Turret Control System C-TCS-${num}"%_t % {num = getNumTurrets(seed, rarity)}
+    return "Turret Control System C-TCS-${num}"%_t % {num = getNumTurrets(seed, rarity, permanent)}
 end
 
 function getIcon(seed, rarity)
@@ -33,19 +41,22 @@ function getEnergy(seed, rarity)
 end
 
 function getPrice(seed, rarity)
-    local num = getNumTurrets(seed, rarity)
+    local num = getNumTurrets(seed, rarity, permanent)
     local price = 5000 * num;
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     return
     {
-        {ltext = "Unarmed Turrets"%_t, rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+        {ltext = "Unarmed Turret Slots"%_t, rtext = "+" .. getNumTurrets(seed, rarity, permanent), icon = "data/textures/icons/turret.png", boosted = permanent}
+    },
+    {
+        {ltext = "Unarmed Turret Slots"%_t, rtext = "+" .. getNumBonusTurrets(seed, rarity, true), icon = "data/textures/icons/turret.png"}
     }
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "Civil Turret Control System"%_t, rtext = "", icon = ""},

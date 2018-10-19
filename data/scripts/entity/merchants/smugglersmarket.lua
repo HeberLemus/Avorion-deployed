@@ -2,6 +2,7 @@ package.path = package.path .. ";data/scripts/lib/?.lua"
 
 require ("stringutility")
 require ("goods")
+require ("utility")
 require ("randomext")
 require ("merchantutility")
 require ("stringutility")
@@ -328,10 +329,12 @@ function SmugglersMarket.onSellButtonPressed(button)
         return
     end
 
-    invokeServerFunction("buyIllegalGood", good.name, amount, true, false, false)
+    invokeServerFunction("buyIllegalGood", good.name, amount)
 end
 
 function SmugglersMarket.buyIllegalGood(goodName, amount)
+    if anynils(goodName, amount) then return end
+
     local seller, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.AddResources, AlliancePrivilege.SpendItems)
     if not seller then return end
 
@@ -442,6 +445,7 @@ function SmugglersMarket.onUnbrandClicked(button)
 end
 
 function SmugglersMarket.unbrand(goodName, amount)
+    if anynils(goodName, amount) then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end

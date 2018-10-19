@@ -33,6 +33,26 @@ function Xsotan.getFaction()
     return faction
 end
 
+function Xsotan.upScale(craft)
+    local sector = Sector()
+    if not sector then
+        print ("no sector")
+        return
+    end
+
+    local x, y = sector:getCoordinates()
+    if not Balancing_InsideRing(x, y) then return end
+
+    local min = Balancing_GetBlockRingMin()
+    local distance = length(vec2(x, y))
+    local factor = 1 - (distance / min) -- from 0 (ring) to 1 (center)
+    factor = math.min(1.0, math.max(0.0, factor)) -- clamp to between 0 and 1 just to be sure
+
+    local upscale = 1.1 + (factor * 7) -- from 1.1 (ring) to 8.1 (center)
+
+    craft.damageMultiplier = craft.damageMultiplier * upscale
+end
+
 function Xsotan.createShip(position, volumeFactor)
     position = position or Matrix()
     local volume = Balancing_GetSectorShipVolume(Sector():getCoordinates())
@@ -59,6 +79,8 @@ function Xsotan.createShip(position, volumeFactor)
     ship:setTitle("Xsotan ${ship}", {ship = ShipUtility.getMilitaryNameByVolume(ship.volume)})
     ship.crew = ship.minCrew
     ship.shieldDurability = ship.shieldMaxDurability
+
+    Xsotan.upScale(ship)
 
     AddDefaultShipScripts(ship)
 
@@ -115,6 +137,8 @@ function Xsotan.createCarrier(position, volumeFactor, fighters)
     ship:setTitle("Xsotan ${ship}", {ship = ShipUtility.getMilitaryNameByVolume(ship.volume)})
     ship.crew = ship.minCrew
     ship.shieldDurability = ship.shieldMaxDurability
+
+    Xsotan.upScale(ship)
 
     AddDefaultShipScripts(ship)
 
@@ -293,7 +317,10 @@ function Xsotan.createGuardian(position, volumeFactor)
         end
     end
 
+    Xsotan.upScale(boss)
+
     AddDefaultShipScripts(boss)
+
     boss:addScript("story/wormholeguardian.lua")
     boss:addScript("story/xsotanbehaviour.lua")
     boss:setValue("is_xsotan", 1)

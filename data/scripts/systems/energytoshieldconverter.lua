@@ -7,23 +7,7 @@ require ("randomext")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function onInstalled(seed, rarity)
-    addBaseMultiplier(StatsBonuses.ShieldDurability, getAmplification(seed, rarity))
-    addBaseMultiplier(StatsBonuses.GeneratedEnergy, getEnergyChange(seed, rarity))
-end
-
-function onUninstalled(seed, rarity)
-end
-
-function getName(seed, rarity)
-    return "Energy to Shield Converter"%_t
-end
-
-function getIcon(seed, rarity)
-    return "data/textures/icons/shield.png"
-end
-
-function getAmplification(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local amplification = 40
@@ -34,32 +18,56 @@ function getAmplification(seed, rarity)
     amplification = amplification + math.random() * (rarity.value + 1) * 15 -- add random value between 0% (worst rarity) and +60% (best rarity)
     amplification = amplification / 100
 
-    return amplification
+    energy = -amplification * 0.3 / (1.1 ^ rarity.value) -- note the minus
+    if permanent then
+        amplification = amplification * 1.4
+    end
+
+    return amplification, energy
 end
 
 function getEnergyChange(seed, rarity)
-    local amplification = getAmplification(seed, rarity)
-    return -amplification * 0.2 / (1.1 ^ rarity.value) -- note the minus
+end
+
+function onInstalled(seed, rarity, permanent)
+    local amplification, energy = getBonuses(seed, rarity, permanent)
+
+    addBaseMultiplier(StatsBonuses.ShieldDurability, amplification)
+    addBaseMultiplier(StatsBonuses.GeneratedEnergy, energy)
+end
+
+function onUninstalled(seed, rarity, permanent)
+end
+
+function getName(seed, rarity)
+    return "Energy to Shield Converter"%_t
+end
+
+function getIcon(seed, rarity)
+    return "data/textures/icons/shield.png"
 end
 
 function getPrice(seed, rarity)
-    local amplification = getAmplification(seed, rarity)
+    local amplification = getBonuses(seed, rarity)
     local price = 5500 * amplification;
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     local texts = {}
-    local amplification = getAmplification(seed, rarity)
-    local energy = getEnergyChange(seed, rarity)
+    local bonuses = {}
+    local amplification, energy = getBonuses(seed, rarity, permanent)
+    local baseAmplification, baseEnergy = getBonuses(seed, rarity, false)
 
-    table.insert(texts, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", amplification * 100), icon = "data/textures/icons/health-normal.png"})
+    table.insert(texts, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", amplification * 100), icon = "data/textures/icons/health-normal.png", boosted = permanent})
+    table.insert(bonuses, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", baseAmplification * 0.4 * 100), icon = "data/textures/icons/health-normal.png"})
+
     table.insert(texts, {ltext = "Generated Energy"%_t, rtext = string.format("%i%%", energy * 100), icon = "data/textures/icons/electric.png"})
 
-    return texts
+    return texts, bonuses
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "Re-routes energy to shields"%_t, rtext = "", icon = ""}

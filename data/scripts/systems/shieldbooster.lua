@@ -8,11 +8,11 @@ require ("randomext")
 local rechargeReady = 0
 local recharging = 0
 local rechargeSpeed = 0
-local rechargeAmount = 0.25
-local rechargeDelay = 300
 
 -- static stats
+rechargeDelay = 300
 rechargeTime = 10
+rechargeAmount = 0.25
 
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
@@ -44,12 +44,12 @@ function startCharging()
 
 end
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local durability = 5 -- base value, in percent
     -- add flat percentage based on rarity
-    durability = durability + (rarity.value + 1) * 15 + 20 -- add 0% (worst rarity) to +80% (best rarity)
+    durability = durability + (rarity.value + 1) * 15 -- add 0% (worst rarity) to +80% (best rarity)
 
     -- add randomized percentage, span is based on rarity
     durability = durability + math.random() * (rarity.value + 1) * 10 -- add random value between 0% (worst rarity) and +60% (best rarity)
@@ -64,9 +64,8 @@ function getBonuses(seed, rarity)
     recharge = recharge / 100
 
 
-
-	rechargeAmount = ((getInt(15, 25) + rarity.value)/100)
-	rechargeDelay = 360 - (getInt(0, 2) * 60)
+	rechargeAmount = rechargeAmount + (math.random() * ((rarity.value-2) * 5)/100)
+	rechargeDelay = rechargeDelay + (math.random() * ((5-rarity.value) * 15))
 
     -- probability for both of them being used
     -- when rarity.value >= 4, always both
@@ -82,15 +81,12 @@ function getBonuses(seed, rarity)
     end
 
     local emergencyRecharge = 0
-    if rarity.value >= 2 then
-        local probability = 1
 
-        if rarity.value == 2 then probability = 0.2 end
-        if rarity.value == 3 then probability = 0.5 end
-        if rarity.value == 4 then probability = 0.75 end
-        if rarity.value == 5 then probability = 1.0 end
+    if permanent then
+        durability = durability * 1.5
+        recharge = recharge * 1.5
 
-        if math.random() < probability then
+        if rarity.value >= 2 then
             emergencyRecharge = 1
         end
     end
@@ -98,8 +94,8 @@ function getBonuses(seed, rarity)
     return durability, recharge, emergencyRecharge
 end
 
-function onInstalled(seed, rarity)
-    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity)
+function onInstalled(seed, rarity, permanent)
+    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity, permanent)
 
     addBaseMultiplier(StatsBonuses.ShieldDurability, durability)
     addBaseMultiplier(StatsBonuses.ShieldRecharge, recharge)
@@ -112,12 +108,9 @@ function onInstalled(seed, rarity)
         updateServer = nil
     end
 
-
-
-
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
@@ -129,7 +122,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/shield.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     local durability, recharge, emergencyRecharge = getBonuses(seed, rarity)
     return (durability * 0.75 + recharge * 2) * 1000 * 1000 * 1000
 end
@@ -140,24 +133,37 @@ function getPrice(seed, rarity)
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
 
     local texts = {}
-    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity)
+    local bonuses = {}
+    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity, permanent)
+    local baseDurability, baseRecharge, baseEmergencyRecharge = getBonuses(seed, rarity, false)
+    local _, _, bonusEmergencyRecharge = getBonuses(seed, rarity, true)
 
     if durability ~= 0 then
-        table.insert(texts, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", durability * 100), icon = "data/textures/icons/health-normal.png"})
+        table.insert(texts, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", durability * 100), icon = "data/textures/icons/health-normal.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Shield Durability"%_t, rtext = string.format("%+i%%", baseDurability * 0.5 * 100), icon = "data/textures/icons/health-normal.png"})
     end
 
     if recharge ~= 0 then
-        table.insert(texts, {ltext = "Shield Recharge Rate"%_t, rtext = string.format("%+i%%", recharge * 100), icon = "data/textures/icons/zebra-shield.png"})
+        table.insert(texts, {ltext = "Shield Recharge Rate"%_t, rtext = string.format("%+i%%", recharge * 100), icon = "data/textures/icons/zebra-shield.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Shield Recharge Rate"%_t, rtext = string.format("%+i%%", baseRecharge * 0.5 * 100), icon = "data/textures/icons/zebra-shield.png"})
     end
 
-    return texts
+    if emergencyRecharge ~= 0 then
+        table.insert(texts, {ltext = "Emergency Recharge"%_t, rtext = string.format("%i%%", rechargeAmount * 100), icon = "data/textures/icons/zebra-shield.png", boosted = permanent})
+    end
+
+    if bonusEmergencyRecharge then
+        table.insert(bonuses, {ltext = string.format("Upon depletion: Recharges %i%% of your shield."%_t, rechargeAmount * 100)})
+    end
+
+    return texts, bonuses
 end
 
-function getDescriptionLines(seed, rarity)
-    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
+    local durability, recharge, emergencyRecharge = getBonuses(seed, rarity, permanent)
 
     local texts = {}
 

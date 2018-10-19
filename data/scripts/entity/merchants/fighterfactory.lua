@@ -3,6 +3,8 @@ package.path = package.path .. ";data/scripts/lib/?.lua"
 require ("stringutility")
 require ("randomext")
 require ("player")
+require ("utility")
+require ("faction")
 require ("merchantutility")
 local SellableFighter = require("sellablefighter")
 local Dialog = require("dialogutility")
@@ -88,7 +90,7 @@ end
 function FighterFactory.initUI()
 
     local res = getResolution()
-    local size = vec2(900, 500)
+    local size = vec2(1000, 500)
 
     local menu = ScriptUI()
     window = menu:createWindow(Rect(res * 0.5 - size * 0.5, res * 0.5 + size * 0.5))
@@ -100,7 +102,7 @@ function FighterFactory.initUI()
 
     local vsplit = UIVerticalMultiSplitter(Rect(size), 10, 10, 2)
 
-    planSelection = window:createSelection(vsplit:partition(0), 4)
+    planSelection = window:createSavedDesignsSelection(vsplit:partition(0), 5)
     turretSelection = window:createInventorySelection(vsplit:partition(2), 5)
 
     local hlsplit = UIHorizontalSplitter(vsplit:partition(1), 10, 0, 0.5)
@@ -233,23 +235,7 @@ function FighterFactory.initUI()
 end
 
 function FighterFactory.fillPlans()
-    for i = 1, 50 do
-        turretSelection:addEmpty()
-        planSelection:addEmpty()
-    end
-
-    planSelection:clear()
-    for _, path in pairs({getWorkshopShips()}) do
-        local item = PlanSelectionItem(path)
-        item.isSubscribedPlan = true
-
-        planSelection:add(item)
-    end
-
-    for _, path in pairs({getSavedShips()}) do
-        planSelection:add(PlanSelectionItem(path))
-    end
-
+    planSelection:refreshTopLevelFolder()
 end
 
 function FighterFactory.fillTurrets()
@@ -268,6 +254,7 @@ function FighterFactory.onShowWindow()
 
     FighterFactory.fillPlans()
     FighterFactory.fillTurrets()
+
     --FighterFactory.refreshPointLabels()
     -- players might consecutively interact as self or alliance
     -- disable ui to get new calculated price and different turrets
@@ -590,7 +577,7 @@ function FighterFactory.onCreatePressed()
     end
 
     local planItem = planSelection.selected
-    if not planItem then
+    if not planItem or planItem.type ~= SavedDesignType.CraftDesign then
         displayChatMessage("You have no plan selected."%_t, "Fighter Factory"%_t, 1)
         return
     end
@@ -608,7 +595,7 @@ end
 
 function FighterFactory.getPlan()
     local planItem = planSelection.selected
-    if not planItem then return end
+    if not planItem or planItem.type ~= SavedDesignType.CraftDesign then return end
 
     return planItem.plan
 end
@@ -741,6 +728,8 @@ function FighterFactory.makeFighter(type, plan, turret, sizePoints, durabilityPo
 end
 
 function FighterFactory.createFighter(type, plan, turretIndex, sizePoints, durabilityPoints, turningSpeedPoints, velocityPoints)
+
+    if anynils(type, plan, turretIndex, sizePoints, durabilityPoints, turningSpeedPoints, velocityPoints) then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end

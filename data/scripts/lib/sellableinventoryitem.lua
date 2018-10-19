@@ -138,6 +138,7 @@ end
 function SellableInventoryItem:soldByPlayer(ship)
 
     local faction = Faction(ship.factionIndex)
+    if not faction then return end
 
     local item = faction:getInventory():take(self.index)
     if item == nil then

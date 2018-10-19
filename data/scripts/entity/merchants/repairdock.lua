@@ -126,16 +126,30 @@ end
 function RepairDock.onShowWindow(option)
     if option == 0 then
         local buyer = Player()
-        local ship = buyer.craft--Entity(player.craftIndex)
+        local ship = buyer.craft
         if ship.factionIndex == buyer.allianceIndex then
             buyer = buyer.alliance
+            DebugInfo():log("RepairDock.onShowWindow Alliance")
+        else
+            DebugInfo():log("RepairDock.onShowWindow Player")
         end
+
+        DebugInfo():log("RepairDock.onShowWindow ship.name: " .. (ship.name or "<No Name>"))
 
         -- get the plan of the player (or alliance)'s ship template
         local intact = buyer:getShipPlan(ship.name)
 
+        if not intact then
+            DebugInfo():log("RepairDock.onShowWindow intact == nil")
+            DebugInfo():log("Ship Names: %s", table.concat({buyer:getShipNames()}, " | "))
+        end
+
         -- get the plan of the player's ship
         local broken = ship:getPlan()
+
+        if not broken then
+            DebugInfo():log("RepairDock.onShowWindow broken == nil")
+        end
 
         -- set to display
         planDisplayer:setPlans(broken, intact)

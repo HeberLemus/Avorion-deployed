@@ -955,7 +955,7 @@ function TradingManager:buyFromShip(shipIndex, goodName, amount, noDockCheck)
 
     -- trading (non-military) ships get higher relation gain
     local relationsChange = GetRelationChangeFromMoney(price)
-    if (ship:getNumArmedTurrets() or 0) <= 1 then
+    if (ship:getNumArmedTurrets()) <= 1 then
         relationsChange = relationsChange * 1.5
     end
 
@@ -1039,7 +1039,7 @@ function TradingManager:sellToShip(shipIndex, goodName, amount, noDockCheck)
 
     -- trading (non-military) ships get higher relation gain
     local relationsChange = GetRelationChangeFromMoney(price)
-    if (ship:getNumArmedTurrets() or 0) <= 1 then
+    if (ship:getNumArmedTurrets()) <= 1 then
         relationsChange = relationsChange * 1.5
     end
 
@@ -1328,7 +1328,7 @@ function TradingManager:getBuyPrice(goodName, sellingFactionIndex)
     if self.factionPaymentFactor == 0 then
         local stationFaction = Faction()
 
-        if stationFaction.index == sellingFactionIndex then return 0 end
+        if not stationFaction or stationFaction.index == sellingFactionIndex then return 0 end
 
         if stationFaction.isAlliance then
             -- is selling player member of the station alliance?
@@ -1413,19 +1413,22 @@ function TradingManager:getSellPrice(goodName, buyingFaction)
         end
 
         if sellerIndex then
-            local relations = Faction():getRelations(sellerIndex)
+            local faction = Faction()
+            if faction then
+                local relations = faction:getRelations(sellerIndex)
 
-            if relations < -10000 then
-                -- bad relations: faction wants more for the goods
-                -- 200% to 100% from -100.000 to -10.000
-                relationFactor = lerp(relations, -100000, -10000, 2.0, 1.0)
-            elseif relations > 30000 then
-                -- good relations: factions start giving player better prices
-                -- 100% to 80% from 30.000 to 90.000
-                relationFactor = lerp(relations, 30000, 90000, 1.0, 0.8)
+                if relations < -10000 then
+                    -- bad relations: faction wants more for the goods
+                    -- 200% to 100% from -100.000 to -10.000
+                    relationFactor = lerp(relations, -100000, -10000, 2.0, 1.0)
+                elseif relations > 30000 then
+                    -- good relations: factions start giving player better prices
+                    -- 100% to 80% from 30.000 to 90.000
+                    relationFactor = lerp(relations, 30000, 90000, 1.0, 0.8)
+                end
+
+                if faction.index == sellerIndex then relationFactor = 0 end
             end
-
-            if Faction().index == sellerIndex then relationFactor = 0 end
         end
 
     end

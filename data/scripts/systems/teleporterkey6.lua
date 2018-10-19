@@ -7,16 +7,18 @@ require ("utility")
 
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
+Unique = true
 
-function getNumTurrets(seed, rarity)
-    return math.max(1, rarity.value)
+function onInstalled(seed, rarity, permanent)
+    if not permanent then return end
+
+    addAbsoluteBias(StatsBonuses.PilotsPerFighter, -100000)
+    addAbsoluteBias(StatsBonuses.MinersPerTurret, -100000)
+    addAbsoluteBias(StatsBonuses.MechanicsPerTurret, -100000)
+    addAbsoluteBias(StatsBonuses.GunnersPerTurret, -100000)
 end
 
-function onInstalled(seed, rarity)
-    addMultiplyableBias(StatsBonuses.ArbitraryTurrets, getNumTurrets(seed, rarity))
-end
-
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -31,16 +33,26 @@ function getPrice(seed, rarity)
     return 10000
 end
 
-function getTooltipLines(seed, rarity)
-    return
+function getTooltipLines(seed, rarity, permanent)
+    local texts =
     {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+        {ltext = "Pilots Required", rtext = "0", icon = CrewProfession(CrewProfessionType.Pilot).icon, boosted = permanent},
+        {ltext = "Gunners Required", rtext = "0", icon = CrewProfession(CrewProfessionType.Gunner).icon, boosted = permanent},
+        {ltext = "Miners Required", rtext = "0", icon = CrewProfession(CrewProfessionType.Miner).icon, boosted = permanent},
     }
+
+    if not permanent then
+        return {}, texts
+    else
+        return texts, texts
+    end
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
+        {ltext = "Replaces Gunners and Pilots with AIs"%_t, rtext = "", icon = ""},
+        {ltext = "", rtext = "", icon = ""},
         {ltext = "This system has 6 vertical "%_t, rtext = "", icon = ""},
         {ltext = "scratches on its surface."%_t, rtext = "", icon = ""}
     }

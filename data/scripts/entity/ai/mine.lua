@@ -11,7 +11,8 @@ local minedAsteroid = nil
 local minedLoot = nil
 local collectCounter = 0
 local canMine = nil
-local noAsteroidsLeft = true
+local noAsteroidsLeft = true --false
+--Mine Mod
 local firstmsg = false -- indicator for first message (resource asteroids farmed) has been sent or not
 local check1 = false -- check1 true means, that no more resource asteroids are findable
 local check2 = false -- check2 true means, that no more asteroids at all are findable (precheck for check3) still, a message has to be sent to the player.
@@ -89,6 +90,7 @@ end
 -- check the sector for an asteroid that can be mined
 -- if there is one, assign minedAsteroid
 function AIMine.findMinedAsteroid()
+	--Mine Mod
 	if check3 == false then
 		local radius = 20
 		local ship = Entity()
@@ -164,7 +166,7 @@ function AIMine.findMinedAsteroid()
 			ship:invokeFunction("craftorders.lua", "setAIAction")
 			check3 = true
 		end
-	end
+	end --Mine Mod End
 end
 
 function AIMine.updateMining(timeStep)

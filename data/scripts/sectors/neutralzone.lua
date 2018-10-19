@@ -77,7 +77,7 @@ function SectorTemplate.generate(player, seed, x, y)
 
     if math.random() < generator:getWormHoleProbability() then generator:createRandomWormHole() end
 
-    Sector():addScript("data/scripts/sector/eventscheduler.lua")
+    Sector():addScriptOnce("data/scripts/sector/eventscheduler.lua")
     generator:addAmbientEvents()
 
     -- this one is added last since it will adjust the events that have been added

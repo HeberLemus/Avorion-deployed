@@ -66,5 +66,5 @@ end
 local s, b = pcall(require, 'mods/ShipScriptLoader/scripts/server/server')
 if s then if b.onPlayerLogIn then local a = onPlayerLogIn; onPlayerLogIn = function(c) a(c); b.onPlayerLogIn(c); end end end
 
-local s, b = pcall(require, 'mods/MoveUI/scripts/server/server')
-if s then if b.onPlayerLogIn then local a = onPlayerLogIn; onPlayerLogIn = function(c) a(c); b.onPlayerLogIn(c); end end else print(b); end
+local r, d = pcall(require, 'mods/MoveUI/scripts/server/server')
+if r then if d.onPlayerLogIn then local a = onPlayerLogIn; onPlayerLogIn = function(c) a(c); d.onPlayerLogIn(c); end end else print(d); end

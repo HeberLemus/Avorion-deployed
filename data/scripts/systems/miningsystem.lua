@@ -11,7 +11,7 @@ amount = 0
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local range = 1000 -- base value
@@ -31,18 +31,24 @@ function getBonuses(seed, rarity)
     -- add randomized amount, span is based on rarity
     amount = amount + math.random() * ((rarity.value + 1) * 5) -- add random value between 0 (worst rarity) and 60 (best rarity)
 
+    if permanent then
+        range = range * 1.5
+        amount = amount * 1.5
+        material = material + 1
+    end
+
     return material, range, amount
 end
 
-function onInstalled(seed, rarity)
-    if onClient() then
+function onInstalled(seed, rarity, permanent)
+    if onClient() and Player() then
         Player():registerCallback("onPreRenderHud", "onPreRenderHud")
     end
 
-    materialLevel, range, amount = getBonuses(seed, rarity)
+    materialLevel, range, amount = getBonuses(seed, rarity, permanent)
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
@@ -104,7 +110,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/mining.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     local materialLevel, range, amount = getBonuses(seed, rarity)
 
     return (range * 0.0005 * materialLevel * 1000 * 1000 * 1000) + (amount * 5 * 1000 * 1000)
@@ -113,29 +119,35 @@ end
 function getPrice(seed, rarity)
     local materialLevel, range, amount = getBonuses(seed, rarity)
 
-    local price = materialLevel * 5000 + amount * 750 + range * 1.15;
+    local price = materialLevel * 4000 + amount * 750 + range * 1.15;
 
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     local texts = {}
+    local bonuses = {}
 
-    local materialLevel, range, amount = getBonuses(seed, rarity)
+    local materialLevel, range, amount = getBonuses(seed, rarity, permanent)
     materialLevel = math.max(0, math.min(materialLevel, NumMaterials() - 1))
     local material = Material(materialLevel)
 
-    table.insert(texts, {ltext = "Material"%_t, rtext = material.name%_t, rcolor = material.color, icon = "data/textures/icons/metal-bar.png"})
-    table.insert(texts, {ltext = "Range"%_t, rtext = string.format("%g", round(range / 100, 2)), icon = "data/textures/icons/rss.png"})
-    table.insert(texts, {ltext = "Asteroids"%_t, rtext = string.format("%i", amount), icon = "data/textures/icons/rock.png"})
+    table.insert(texts, {ltext = "Material"%_t, rtext = material.name%_t, rcolor = material.color, icon = "data/textures/icons/metal-bar.png", boosted = permanent})
+    table.insert(texts, {ltext = "Range"%_t, rtext = string.format("%g", round(range / 100, 2)), icon = "data/textures/icons/rss.png", boosted = permanent})
+    table.insert(texts, {ltext = "Asteroids"%_t, rtext = string.format("%i", amount), icon = "data/textures/icons/rock.png", boosted = permanent})
 
-    return texts
+    local _, baseRange, baseAmount = getBonuses(seed, rarity, false)
+    table.insert(bonuses, {ltext = "Material Level"%_t, rtext = "+1", icon = "data/textures/icons/metal-bar.png"})
+    table.insert(bonuses, {ltext = "Range"%_t, rtext = string.format("+%g", round(baseRange * 0.5 / 100, 2)), icon = "data/textures/icons/rss.png"})
+    table.insert(bonuses, {ltext = "Asteroids"%_t, rtext = string.format("+%i", amount * 0.5), icon = "data/textures/icons/rock.png"})
+
+    return texts, bonuses
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     local texts = {}
 
-    local materialLevel, range, amount = getBonuses(seed, rarity)
+    local materialLevel, range, amount = getBonuses(seed, rarity, permanent)
     materialLevel = math.max(0, math.min(materialLevel, NumMaterials() - 1))
     local material = Material(materialLevel)
 

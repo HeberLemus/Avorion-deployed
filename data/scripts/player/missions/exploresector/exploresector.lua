@@ -174,7 +174,7 @@ function onPreRenderHud()
         local entity = Entity(missionData.interestingPoints[i])
         if entity and entity:hasScript("exploreobject.lua") then
             renderer:renderEntityTargeter(entity, color)
-            renderer:renderEntityArrow(entity, 30, 10, 250, color, 0)
+            renderer:renderEntityArrow(entity, 30, 10, 250, color)
         end
     end
     renderer:display()

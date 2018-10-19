@@ -278,8 +278,8 @@ function CrewBoard.refreshUI()
         group.slider.segments = number
 
         if pair.profession == CrewProfessionType.Captain then
-            group.slider.max = 1
-            group.slider.segments = 1
+            group.slider.max = math.min(1, number)
+            group.slider.segments = math.min(1, number)
         end
     end
 
@@ -382,6 +382,7 @@ function CrewBoard.sync(available, transport)
 end
 
 function CrewBoard.hireCrew(i, num)
+    if anynils(i, num) then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end
@@ -504,7 +505,7 @@ end
 function CrewBoard.finalizeCrewTransport(ship)
     transportData = transportData or {}
 
-    ship:addScriptOnce("crewtransport.lua", transportData.craft or Uuid(), transportData.crew or Crew())
+    ship:addScriptOnce("crewtransport.lua", transportData.craft or Uuid(), transportData.crew or {})
 
     transportData = nil
     CrewBoard.sync()

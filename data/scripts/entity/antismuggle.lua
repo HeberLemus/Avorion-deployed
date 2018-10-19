@@ -50,6 +50,8 @@ function AntiSmuggle.updateSuspiciousShipDetection(timeStep)
     local scannerDistance = 400.0
 
     local selfFaction = Faction()
+    if not selfFaction then return end
+
     sphere.radius = scannerDistance * (1.0 + 0.5 * selfFaction:getTrait("paranoid"))
 
     local entities = {Sector():getEntitiesByLocation(sphere)}
@@ -146,7 +148,9 @@ function AntiSmuggle.updateSuspicionDetectedBehaviour(timeStep)
     --
     if not valid(suspicion.ship) then
         local faction = Faction()
-        Galaxy():changeFactionRelations(faction, Faction(suspicion.factionIndex), -25000 - (10000 * faction:getTrait("strict")), true, true)
+        if faction then
+            Galaxy():changeFactionRelations(faction, Faction(suspicion.factionIndex), -25000 - (10000 * faction:getTrait("strict")), true, true)
+        end
         AntiSmuggle.resetSuspicion()
         return
     end
@@ -157,7 +161,9 @@ function AntiSmuggle.updateSuspicionDetectedBehaviour(timeStep)
         suspicion.timeOut = values.timeOut
 
         local faction = Faction()
-        Galaxy():changeFactionRelations(faction, Faction(suspicion.factionIndex), -2500 - (1250 * faction:getTrait("strict")), true, true)
+        if faction then
+            Galaxy():changeFactionRelations(faction, Faction(suspicion.factionIndex), -2500 - (1250 * faction:getTrait("strict")), true, true)
+        end
 
         if valid(suspicion.player) then
             invokeClientFunction(suspicion.player, "startHailing", suspicion.type, suspicion.fine)
@@ -324,7 +330,10 @@ function AntiSmuggle.onComply()
 
     if suspicion and suspicion.factionIndex and suspicion.player and suspicion.player.index == callingPlayer then
         suspicion.responded = true
-        Faction(suspicion.factionIndex):pay("Paid a fine of %1% credits."%_T, suspicion.fine)
+        local faction = Faction(suspicion.factionIndex)
+        if faction then
+            faction:pay("Paid a fine of %1% credits."%_T, suspicion.fine)
+        end
     end
 end
 

@@ -7,7 +7,7 @@ require ("randomext")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local vfactor = 5 -- base value, in percent
@@ -26,6 +26,11 @@ function getBonuses(seed, rarity)
     afactor = afactor + math.random() * ((rarity.value + 1) * 6) -- add random value between 0% (worst rarity) and +24% (best rarity)
     afactor = afactor / 100
 
+    if permanent then
+        vfactor = vfactor * 1.5
+        afactor = afactor * 1.5
+    end
+
     -- probability for both of them being used
     -- when rarity.value >= 4, always both
     -- when rarity.value <= 0 always only one
@@ -42,14 +47,14 @@ function getBonuses(seed, rarity)
     return vfactor, afactor
 end
 
-function onInstalled(seed, rarity)
-    local vel, acc = getBonuses(seed, rarity)
+function onInstalled(seed, rarity, permanent)
+    local vel, acc = getBonuses(seed, rarity, permanent)
 
     addBaseMultiplier(StatsBonuses.Velocity, vel)
     addBaseMultiplier(StatsBonuses.Acceleration, acc)
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
@@ -61,7 +66,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/rocket-thruster.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     local vel, acc = getBonuses(seed, rarity)
     return (vel + acc) * 1.5 * 1000 * 1000 * 1000
 end
@@ -72,18 +77,22 @@ function getPrice(seed, rarity)
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
 
     local texts = {}
-    local vel, acc = getBonuses(seed, rarity)
+    local bonuses = {}
+    local vel, acc = getBonuses(seed, rarity, permanent)
+    local baseVel, baseAcc = getBonuses(seed, rarity, false)
 
     if vel ~= 0 then
-        table.insert(texts, {ltext = "Velocity"%_t, rtext = string.format("%+i%%", vel * 100), icon = "data/textures/icons/lucifer-cannon.png"})
+        table.insert(texts, {ltext = "Velocity"%_t, rtext = string.format("%+i%%", vel * 100), icon = "data/textures/icons/lucifer-cannon.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Velocity"%_t, rtext = string.format("%+i%%", baseVel * 0.5 * 100), icon = "data/textures/icons/lucifer-cannon.png"})
     end
 
     if acc ~= 0 then
-        table.insert(texts, {ltext = "Acceleration"%_t, rtext = string.format("%+i%%", acc * 100), icon = "data/textures/icons/blaster.png"})
+        table.insert(texts, {ltext = "Acceleration"%_t, rtext = string.format("%+i%%", acc * 100), icon = "data/textures/icons/blaster.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Acceleration"%_t, rtext = string.format("%+i%%", baseAcc * 0.5 * 100), icon = "data/textures/icons/blaster.png"})
     end
 
-    return texts
+    return texts, bonuses
 end

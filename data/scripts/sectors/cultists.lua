@@ -86,7 +86,7 @@ function SectorTemplate.generate(player, seed, x, y)
     end
 
 
-    Sector():addScript("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
+    Sector():addScriptOnce("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
     Sector():addScript("data/scripts/sector/cultistbehavior.lua", matrix, asteroid.index.string, unpack(cultists))
 
     generator:addOffgridAmbientEvents()

@@ -252,6 +252,22 @@ local function fillDescriptions(obj, tooltip, additional)
 
     local descriptions = obj:getDescriptions()
 
+    if obj.shotsUntilOverheated > 0 then
+        if obj.shootingTime > 2 then
+            table.insert(additional, "Overheats"%_t)
+        else
+            table.insert(additional, "Burst Fire"%_t)
+        end
+    end
+
+    if obj.seeker then
+        table.insert(additional, "Seeker Missiles"%_t)
+    end
+
+    if obj.shieldDamageMultiplicator == 0 then
+        table.insert(additional, "No damage to shields"%_t)
+    end
+
     for desc, value in pairs(descriptions) do
         local line = TooltipLine(lineHeight, fontSize)
 
@@ -272,13 +288,6 @@ local function fillDescriptions(obj, tooltip, additional)
             tooltip:addLine(line)
             extraLines = extraLines + 1
         end
-    end
-
-    if obj.seeker then
-        local line = TooltipLine(lineHeight, fontSize)
-        line.ltext = "Seeker Missiles"%_t
-        tooltip:addLine(line)
-        extraLines = extraLines + 1
     end
 
     for _, text in pairs(additional) do
@@ -320,6 +329,18 @@ function makeTurretTooltip(turret)
             title = "Quad ${material} ${weaponPrefix} Turret"%_t % tbl
         else
             title = "Multi ${material} ${weaponPrefix} Turret"%_t % tbl
+        end
+    elseif turret.coaxial then
+        if turret.numVisibleWeapons == 1 then
+            title = "Coaxial ${weaponPrefix} Cannon"%_t % tbl
+        elseif turret.numVisibleWeapons == 2 then
+            title = "Coaxial Double ${weaponPrefix} Cannon"%_t % tbl
+        elseif turret.numVisibleWeapons == 3 then
+            title = "Coaxial Triple ${weaponPrefix} Cannon"%_t % tbl
+        elseif turret.numVisibleWeapons == 4 then
+            title = "Coaxial Quad ${weaponPrefix} Cannon"%_t % tbl
+        else
+            title = "Coaxial Multi ${weaponPrefix} Cannon"%_t % tbl
         end
     else
         if turret.numVisibleWeapons == 1 then
@@ -377,6 +398,18 @@ function makeTurretTooltip(turret)
         tooltip:addLine(TooltipLine(15, 15))
     end
 
+    -- coaxial weaponry
+    if turret.coaxial then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Coaxial Weapon"%_t
+        line.icon = "data/textures/icons/cog.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+
+        -- empty line
+        tooltip:addLine(TooltipLine(15, 15))
+    end
+
     -- crew requirements
     local crew = turret:getCrew()
 
@@ -402,9 +435,8 @@ function makeTurretTooltip(turret)
     if turret.automatic then
         table.insert(description, "Independent targeting, but deals less damage"%_t)
     end
-
-    if turret.shieldDamageMultiplicator == 0 then
-        table.insert(description, "No damage to shields"%_t)
+    if turret.coaxial then
+        table.insert(description, "Coaxial weapon"%_t)
     end
 
     fillDescriptions(turret, tooltip, description)

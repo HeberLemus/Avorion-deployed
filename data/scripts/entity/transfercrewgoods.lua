@@ -1023,6 +1023,8 @@ function TransferCrewGoods.clampNumberString(string, max)
     if string == "" then return "" end
 
     local num = tonumber(string)
+    if not num then return "" end
+
     if num > max then num = max end
 
     return tostring(num)

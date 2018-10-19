@@ -1,6 +1,7 @@
 package.path = package.path .. ";data/scripts/lib/?.lua"
 require ("defaultscripts")
 require ("stringutility")
+require ("utility")
 
 local nameTextBox = nil
 
@@ -115,6 +116,8 @@ end
 
 function found(name, forAlliance)
 
+    if anynils(name, forAlliance) then return end
+
     if Faction().index ~= callingPlayer then return end
     local player = Player(callingPlayer)
 
@@ -141,26 +144,4 @@ function found(name, forAlliance)
     end
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

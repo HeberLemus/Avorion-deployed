@@ -7,7 +7,7 @@ require ("randomext")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local energy = 30 -- base value, in percent
@@ -26,6 +26,11 @@ function getBonuses(seed, rarity)
     charge = charge + math.random() * ((rarity.value + 1) * 5) -- add random value between 0% (worst rarity) and +24% (best rarity)
     charge = charge / 100
 
+    if permanent then
+        charge = charge * 1.5
+        energy = energy * 1.5
+    end
+
     -- probability for both of them being used
     -- when rarity.value >= 4, always both
     -- when rarity.value <= 0 always only one
@@ -42,14 +47,14 @@ function getBonuses(seed, rarity)
     return energy, charge
 end
 
-function onInstalled(seed, rarity)
-    local energy, charge = getBonuses(seed, rarity)
+function onInstalled(seed, rarity, permanent)
+    local energy, charge = getBonuses(seed, rarity, permanent)
 
     addBaseMultiplier(StatsBonuses.EnergyCapacity, energy)
     addBaseMultiplier(StatsBonuses.BatteryRecharge, charge)
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
@@ -61,7 +66,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/battery-pack-alt.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     return 0
 end
 
@@ -71,19 +76,23 @@ function getPrice(seed, rarity)
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
 
     local texts = {}
-    local energy, charge = getBonuses(seed, rarity)
+    local bonuses = {}
+    local energy, charge = getBonuses(seed, rarity, permanent)
+    local baseEnergy, baseCharge = getBonuses(seed, rarity, false)
 
     if energy ~= 0 then
-        table.insert(texts, {ltext = "Energy Capacity"%_t, rtext = string.format("%+i%%", energy * 100), icon = "data/textures/icons/battery-pack-alt.png"})
+        table.insert(texts, {ltext = "Energy Capacity"%_t, rtext = string.format("%+i%%", energy * 100), icon = "data/textures/icons/battery-pack-alt.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Energy Capacity"%_t, rtext = string.format("%+i%%", baseEnergy * 0.5 * 100), icon = "data/textures/icons/battery-pack-alt.png", boosted = permanent})
     end
 
     if charge ~= 0 then
-        table.insert(texts, {ltext = "Recharge Rate"%_t, rtext = string.format("%+i%%", charge * 100), icon = "data/textures/icons/energise.png"})
+        table.insert(texts, {ltext = "Recharge Rate"%_t, rtext = string.format("%+i%%", charge * 100), icon = "data/textures/icons/energise.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Recharge Rate"%_t, rtext = string.format("%+i%%", baseCharge * 0.5 * 100), icon = "data/textures/icons/energise.png", boosted = permanent})
     end
 
-    return texts
+    return texts, bonuses
 end
 

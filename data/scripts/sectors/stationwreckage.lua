@@ -76,7 +76,7 @@ function SectorTemplate.generate(player, seed, x, y)
     local sector = Sector()
     sector:deleteEntity(station)
 
-    sector:addScript("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
+    sector:addScriptOnce("data/scripts/sector/eventscheduler.lua", "events/pirateattack.lua")
 
     Placer.resolveIntersections()
 end

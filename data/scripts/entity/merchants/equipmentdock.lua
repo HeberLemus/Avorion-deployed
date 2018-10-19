@@ -60,6 +60,8 @@ function EquipmentDock.initialize()
     if onClient() and EntityIcon().icon == "" then
         EntityIcon().icon = "data/textures/icons/pixel/sdwhite.png"
     end
+
+    Entity():setValue("remove_permanent_upgrades", true)
 end
 
 function EquipmentDock.initUI()

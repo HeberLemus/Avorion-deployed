@@ -7,7 +7,7 @@ require ("randomext")
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
 
-function getBonuses(seed, rarity)
+function getBonuses(seed, rarity, permanent)
     math.randomseed(seed)
 
     local reach = 0
@@ -20,8 +20,8 @@ function getBonuses(seed, rarity)
 
     if rarity.value >= 4 then numBonuses = 3
     elseif rarity.value == 3 then numBonuses = getInt(2, 3)
-    elseif rarity.value == 2 then numBonuses = getInt(1, 3)
-    elseif rarity.value == 1 then numBonuses = getInt(1, 2)
+    elseif rarity.value == 2 then numBonuses = getInt(2, 3)
+    elseif rarity.value == 1 then numBonuses = 2
     end
 
     -- pick bonuses
@@ -29,7 +29,7 @@ function getBonuses(seed, rarity)
     bonuses[StatsBonuses.HyperspaceReach] = 10.5
     bonuses[StatsBonuses.HyperspaceCooldown] = 1
     bonuses[StatsBonuses.HyperspaceRechargeEnergy] = 1
-    bonuses[StatsBonuses.RadarReach] = 1
+    bonuses[StatsBonuses.RadarReach] = 0.25
 
     local enabled = {}
 
@@ -67,11 +67,18 @@ function getBonuses(seed, rarity)
         radar = math.max(0, getInt(rarity.value, rarity.value * 2.0)) + 1
     end
 
+    if permanent then
+        reach = reach * 2.5 + rarity.value
+        radar = radar * 1.5
+    else
+        cdfactor = 0
+    end
+
     return reach, cdfactor, efactor, radar
 end
 
-function onInstalled(seed, rarity)
-    local reach, cooldown, energy, radar = getBonuses(seed, rarity)
+function onInstalled(seed, rarity, permanent)
+    local reach, cooldown, energy, radar = getBonuses(seed, rarity, permanent)
 
     addMultiplyableBias(StatsBonuses.HyperspaceReach, reach)
     addBaseMultiplier(StatsBonuses.HyperspaceCooldown, cooldown)
@@ -79,7 +86,7 @@ function onInstalled(seed, rarity)
     addMultiplyableBias(StatsBonuses.RadarReach, radar)
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 
 end
 
@@ -98,7 +105,7 @@ function getIcon(seed, rarity)
     return "data/textures/icons/vortex.png"
 end
 
-function getEnergy(seed, rarity)
+function getEnergy(seed, rarity, permanent)
     local reach, cdfactor, efactor, radar = getBonuses(seed, rarity)
     return math.abs(cdfactor) * 2.5 * 1000 * 1000 * 10 + reach * 125 * 1000 * 1000 + radar * 75 * 1000 * 1000
 end
@@ -109,26 +116,36 @@ function getPrice(seed, rarity)
     return price * 2.5 ^ rarity.value
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
 
     local texts = {}
-    local reach, cdfactor, efactor, radar = getBonuses(seed, rarity)
+    local bonuses = {}
+    local reach, _, efactor, radar = getBonuses(seed, rarity, permanent)
+    local baseReach, _, _, baseRadar = getBonuses(seed, rarity, false)
+    local _, cdfactor, _, _ = getBonuses(seed, rarity, true)
 
     if reach ~= 0 then
-        table.insert(texts, {ltext = "Jump Range"%_t, rtext = string.format("%+i", reach), icon = "data/textures/icons/star-cycle.png"})
+        table.insert(texts, {ltext = "Jump Range"%_t, rtext = string.format("%+i", reach), icon = "data/textures/icons/star-cycle.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Jump Range"%_t, rtext = string.format("%+i", baseReach * 1.5 + rarity.value), icon = "data/textures/icons/star-cycle.png", boosted = permanent})
     end
 
     if radar ~= 0 then
-        table.insert(texts, {ltext = "Radar Range"%_t, rtext = string.format("%+i", radar), icon = "data/textures/icons/radar-sweep.png"})
+        table.insert(texts, {ltext = "Radar Range"%_t, rtext = string.format("%+i", radar), icon = "data/textures/icons/radar-sweep.png", boosted = permanent})
+        table.insert(bonuses, {ltext = "Radar Range"%_t, rtext = string.format("%+i", baseRadar * 0.5), icon = "data/textures/icons/radar-sweep.png", boosted = permanent})
     end
 
     if cdfactor ~= 0 then
-        table.insert(texts, {ltext = "Hyperspace Cooldown"%_t, rtext = string.format("%+i%%", cdfactor * 100), icon = "data/textures/icons/hourglass.png"})
+        if permanent then
+            table.insert(texts, {ltext = "Hyperspace Cooldown"%_t, rtext = string.format("%+i%%", cdfactor * 100), icon = "data/textures/icons/hourglass.png", boosted = permanent})
+        end
+        table.insert(bonuses, {ltext = "Hyperspace Cooldown"%_t, rtext = string.format("%+i%%", cdfactor * 100), icon = "data/textures/icons/hourglass.png", boosted = permanent})
     end
 
     if efactor ~= 0 then
         table.insert(texts, {ltext = "Recharge Energy"%_t, rtext = string.format("%+i%%", efactor * 100), icon = "data/textures/icons/electric.png"})
     end
 
-    return texts
+    if #bonuses == 0 then bonuses = nil end
+
+    return texts, bonuses
 end

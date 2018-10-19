@@ -397,6 +397,8 @@ function Scrapyard.getShipValue(plan)
 end
 
 function Scrapyard.buyLicense(duration)
+    duration = duration or 0
+    if duration <= 0 then return end
 
     local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
     if not buyer then return end
@@ -511,4 +513,4 @@ function Scrapyard.unallowedDamaging(shooter, faction, damage)
 
 end
 
-    if not pcall(require, 'mods.MoveUI.scripts.entity.merchants.scrapyard') then print('Mod: MoveUI, failed to extend scrapyard.lua!') end
+

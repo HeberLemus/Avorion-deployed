@@ -300,3 +300,10 @@ function onSync()
         missionData.plural = g.displayPlural
     end
 end
+
+function onRestore()
+    if not missionData.location then
+        terminate()
+        return
+    end
+end

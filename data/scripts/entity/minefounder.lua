@@ -231,6 +231,9 @@ function onConfirmTransformationButtonPress(button)
 end
 
 function onNameEntered(window, name)
+    if not selectedProduction.goodName then return end
+    if not selectedProduction.index then return end
+
     invokeServerFunction("foundFactory", selectedProduction.goodName, selectedProduction.index, name)
 end
 
@@ -239,6 +242,7 @@ function onCancelTransformationButtonPress(button)
 end
 
 function foundFactory(goodName, productionIndex, name)
+    if anynils(goodName, productionIndex, name) then return end
 
     local buyer, asteroid, player = checkEntityInteractionPermissions(Entity(), AlliancePrivilege.FoundStations)
     if not buyer then return end
@@ -260,6 +264,7 @@ function foundFactory(goodName, productionIndex, name)
         return
     end
 
+    DebugInfo():log("goodName: %s productionIndex: %s name: %s", tostring(goodName), tostring(productionIndex), tostring(name))
     local production = productionsByGood[goodName][productionIndex]
 
     if production == nil then

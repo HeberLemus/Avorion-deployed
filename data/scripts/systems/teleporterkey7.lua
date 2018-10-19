@@ -7,16 +7,22 @@ require ("utility")
 
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
+Unique = true
 
-function getNumTurrets(seed, rarity)
-    return math.max(1, rarity.value)
+function getBonuses(seed, rarity)
+    return 6.0, 4.25
 end
 
-function onInstalled(seed, rarity)
-    addMultiplyableBias(StatsBonuses.ArbitraryTurrets, getNumTurrets(seed, rarity))
+function onInstalled(seed, rarity, permanent)
+    if not permanent then return end
+
+    local energy, charge = getBonuses(seed, rarity)
+
+    addBaseMultiplier(StatsBonuses.GeneratedEnergy, energy)
+    addBaseMultiplier(StatsBonuses.BatteryRecharge, charge)
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -31,14 +37,22 @@ function getPrice(seed, rarity)
     return 10000
 end
 
-function getTooltipLines(seed, rarity)
-    return
-    {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
-    }
+function getTooltipLines(seed, rarity, permanent)
+
+    local texts = {}
+    local energy, charge = getBonuses(seed, rarity)
+
+    table.insert(texts, {ltext = "Generated Energy"%_t, rtext = string.format("%+i%%", energy * 100), icon = "data/textures/icons/electric.png", boosted = permanent})
+    table.insert(texts, {ltext = "Recharge Rate"%_t, rtext = string.format("%+i%%", charge * 100), icon = "data/textures/icons/energise.png", boosted = permanent})
+
+    if not permanent then
+        return {}, texts
+    else
+        return texts, texts
+    end
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "This system has 7 vertical "%_t, rtext = "", icon = ""},

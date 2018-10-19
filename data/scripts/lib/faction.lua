@@ -56,6 +56,9 @@ function CheckFactionInteraction(playerIndex, relationThreshold, msg)
     end
 
     local stationFaction = Faction()
+    if not stationFaction then
+        return false, msg or "This station doesn't belong to anybody."%_t
+    end
 
     -- alliance ships should always be able to interact with alliance-player stations
     if stationFaction.isPlayer then

@@ -11,7 +11,7 @@ local minedWreckage = nil
 local minedLoot = nil
 local collectCounter = 0
 local canSalvage = nil
-local noWreckagesLeft = true
+local noWreckagesLeft = false
 
 function AISalvage.getUpdateInterval()
     if noWreckagesLeft then return 15 end

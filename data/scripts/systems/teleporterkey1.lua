@@ -7,16 +7,12 @@ require ("utility")
 
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
+Unique = true
 
-function getNumTurrets(seed, rarity)
-    return math.max(1, rarity.value)
+function onInstalled(seed, rarity, permanent)
 end
 
-function onInstalled(seed, rarity)
-    addMultiplyableBias(StatsBonuses.ArbitraryTurrets, getNumTurrets(seed, rarity))
-end
-
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -31,17 +27,26 @@ function getPrice(seed, rarity)
     return 10000
 end
 
-function getTooltipLines(seed, rarity)
+function getTooltipLines(seed, rarity, permanent)
     return
     {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+        {ltext = "This artifact seems to function as"%_t, rtext = "", icon = ""},
+        {ltext = "some kind of ancient key."%_t, rtext = "", icon = ""},
     }
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "This system has a vertical "%_t, rtext = "", icon = ""},
         {ltext = "scratch on its surface."%_t, rtext = "", icon = ""}
     }
+end
+
+function secure()
+
+end
+
+function restore()
+
 end

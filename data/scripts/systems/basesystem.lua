@@ -3,13 +3,15 @@ require ("stringutility")
 
 local seed = nil
 local rarity = nil
+local permanent = false
 
-function initialize(seed32_in, rarity_in)
+function initialize(seed32_in, rarity_in, permanent_in)
     if seed32_in and rarity_in then
         seed = Seed(seed32_in)
         rarity = rarity_in
+        permanent = permanent_in
         if seed and rarity then
-            onInstalled(seed, rarity)
+            onInstalled(seed, rarity, permanent)
         end
     end
 
@@ -19,13 +21,14 @@ function initialize(seed32_in, rarity_in)
 end
 
 function remoteInstall()
-    broadcastInvokeClientFunction("remoteInstallCallback", seed, rarity)
+    broadcastInvokeClientFunction("remoteInstallCallback", seed, rarity, permanent)
 end
 
-function remoteInstallCallback(seed_in, rarity_in)
+function remoteInstallCallback(seed_in, rarity_in, permanent_in)
     seed = seed_in
     rarity = rarity_in
-    onInstalled(seed, rarity)
+    permanent = permanent_in or false
+    onInstalled(seed, rarity, permanent)
 end
 
 -- example: factor 0.3 -> new = old * 1.3
@@ -70,7 +73,7 @@ end
 
 function onRemove()
     if onUninstalled then
-        onUninstalled(seed, rarity)
+        onUninstalled(seed, rarity, permanent)
     end
 end
 
@@ -78,23 +81,52 @@ function secure()
     -- this acts as a failsafe when something crashes
     seed = seed or Seed(111111)
     rarity = rarity or Rarity(0)
+    permanent = permanent or false
 
-    return {seed = seed.value, rarity = rarity.value}
+    return {seed = seed.value, rarity = rarity.value, permanent = permanent}
 end
 
 function restore(data)
     if not data then
         seed = Seed(111111)
         rarity = Rarity(0)
+        permanent = false
     else
         seed = Seed(data.seed or 111111)
         rarity = Rarity(data.rarity or 0)
+        permanent = data.permanent or false
     end
 
-    onInstalled(seed, rarity)
+    onInstalled(seed, rarity, permanent)
 end
 
-function makeTooltip(seed, rarity)
+function makeLine(l)
+    local fontSize = 14;
+    local lineHeight = 20;
+
+    local iconColor = ColorRGB(0.5, 0.5, 0.5)
+
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = l.ltext or ""
+    line.ctext = l.ctext or ""
+    line.rtext = l.rtext or ""
+    line.icon = l.icon or ""
+    line.lcolor = l.lcolor or ColorRGB(1, 1, 1)
+    line.ccolor = l.ccolor or ColorRGB(1, 1, 1)
+    line.rcolor = l.rcolor or ColorRGB(1, 1, 1)
+    line.lbold = l.lbold or false
+    line.cbold = l.cbold or false
+    line.rbold = l.rbold or false
+    line.litalic = l.litalic or false
+    line.citalic = l.citalic or false
+    line.ritalic = l.ritalic or false
+    line.iconColor = l.color or iconColor
+
+    return line
+end
+
+function makeTooltip(seed, rarity, permanent)
+
     local tooltip = Tooltip()
     tooltip.icon = getIcon(seed, rarity)
 
@@ -118,35 +150,52 @@ function makeTooltip(seed, rarity)
     -- empty line to separate headline from descriptions
     tooltip:addLine(TooltipLine(18, 18))
 
+    local bonusLines
     if getTooltipLines then
-        local lines = getTooltipLines(seed, rarity)
+        local lines
+        lines, bonusLines = getTooltipLines(seed, rarity, permanent)
         for _, l in pairs(lines) do
-            -- size
-            local line = TooltipLine(lineHeight, fontSize)
-            line.ltext = l.ltext or ""
-            line.ctext = l.ctext or ""
-            line.rtext = l.rtext or ""
-            line.icon = l.icon or ""
-            line.lcolor = l.lcolor or ColorRGB(1, 1, 1)
-            line.ccolor = l.ccolor or ColorRGB(1, 1, 1)
-            line.rcolor = l.rcolor or ColorRGB(1, 1, 1)
-            line.lbold = l.lbold or false
-            line.cbold = l.cbold or false
-            line.rbold = l.rbold or false
-            line.litalic = l.litalic or false
-            line.citalic = l.citalic or false
-            line.ritalic = l.ritalic or false
-            line.iconColor = l.color or iconColor
+            local line = makeLine(l)
+            if l.boosted then line.rcolor = ColorRGB(0, 1, 0) end
             tooltip:addLine(line)
         end
     end
 
     -- empty lines to separate stats and descriptions
+    if bonusLines then
+        tooltip:addLine(TooltipLine(15, 15))
+
+        if not permanent then
+            local line = TooltipLine(lineHeight, fontSize)
+            line.ltext = "Bonuses for Permanent Installation:"%_t
+            line.icon = "data/textures/icons/anchor.png"
+            line.iconColor = ColorRGB(0.7, 0.7, 0.7)
+            line.lcolor = ColorRGB(0.7, 0.7, 0.7)
+            line.litalic = true
+            tooltip:addLine(line)
+
+            for _, l in pairs(bonusLines) do
+                local line = makeLine(l)
+                line.rcolor = ColorRGB(0.7, 0.7, 0.7)
+                line.ccolor = ColorRGB(0.7, 0.7, 0.7)
+                line.lcolor = ColorRGB(0.7, 0.7, 0.7)
+                tooltip:addLine(line)
+            end
+        else
+            local line = TooltipLine(lineHeight, fontSize)
+            line.ltext = "Permanent Installation Bonuses Active"%_t
+            line.icon = "data/textures/icons/anchor.png"
+            line.iconColor = ColorRGB(1, 1, 1)
+            line.litalic = true
+            tooltip:addLine(line)
+        end
+    end
+
     -- energy consumption (if any)
     if getEnergy then
         tooltip:addLine(TooltipLine(15, 15))
 
-        local energy, unitPrefix = getReadableValue(getEnergy(seed, rarity))
+        local energy, unitPrefix = getReadableValue(getEnergy(seed, rarity, permanent))
 
         if energy ~= 0 then
             local line = TooltipLine(lineHeight, fontSize)
@@ -158,29 +207,23 @@ function makeTooltip(seed, rarity)
         end
     end
 
+    if Unique == true then
+        tooltip:addLine(TooltipLine(15, 15))
+
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Unique: Can only be installed once"%_t
+        line.icon = "data/textures/icons/diamonds.png"
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    end
+
     tooltip:addLine(TooltipLine(15, 15))
 
     if getDescriptionLines then
-        local lines = getDescriptionLines(seed, rarity)
+        local lines = getDescriptionLines(seed, rarity, permanent)
 
         for _, l in pairs(lines) do
-            -- size
-            local line = TooltipLine(lineHeight, fontSize)
-            line.ltext = l.ltext or ""
-            line.ctext = l.ctext or ""
-            line.rtext = l.rtext or ""
-            line.icon = l.icon or ""
-            line.lcolor = l.lcolor or ColorRGB(1, 1, 1)
-            line.ccolor = l.ccolor or ColorRGB(1, 1, 1)
-            line.rcolor = l.rcolor or ColorRGB(1, 1, 1)
-            line.lbold = l.lbold or false
-            line.cbold = l.cbold or false
-            line.rbold = l.rbold or false
-            line.litalic = l.litalic or false
-            line.citalic = l.citalic or false
-            line.ritalic = l.ritalic or false
-            line.iconColor = l.color or iconColor
-            tooltip:addLine(line)
+            tooltip:addLine(makeLine(l))
         end
 
         -- empty lines so the icon wont overlap with the descriptions
@@ -204,6 +247,10 @@ end
 
 function getSeed()
     return seed
+end
+
+function getPermanent()
+    return permanent
 end
 
 

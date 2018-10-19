@@ -7,16 +7,18 @@ require ("utility")
 
 -- optimization so that energy requirement doesn't have to be read every frame
 FixedEnergyRequirement = true
+Unique = true
 
-function getNumTurrets(seed, rarity)
-    return math.max(1, rarity.value)
+function getNumTurrets(seed, rarity, permanent)
+    return 50
 end
 
-function onInstalled(seed, rarity)
-    addMultiplyableBias(StatsBonuses.ArbitraryTurrets, getNumTurrets(seed, rarity))
+function onInstalled(seed, rarity, permanent)
+    if not permanent then return end
+    addMultiplyableBias(StatsBonuses.UnarmedTurrets, getNumTurrets(seed, rarity, permanent))
 end
 
-function onUninstalled(seed, rarity)
+function onUninstalled(seed, rarity, permanent)
 end
 
 function getName(seed, rarity)
@@ -31,14 +33,20 @@ function getPrice(seed, rarity)
     return 3000000
 end
 
-function getTooltipLines(seed, rarity)
-    return
+function getTooltipLines(seed, rarity, permanent)
+    local texts =
     {
---        {ltext = "All Turrets", rtext = "+" .. getNumTurrets(seed, rarity), icon = "data/textures/icons/turret.png"}
+        {ltext = "Unarmed Turret Slots"%_t, rtext = "+" .. getNumTurrets(seed, rarity, permanent), icon = "data/textures/icons/turret.png", boosted = permanent}
     }
+
+    if not permanent then
+        return {}, texts
+    else
+        return texts, texts
+    end
 end
 
-function getDescriptionLines(seed, rarity)
+function getDescriptionLines(seed, rarity, permanent)
     return
     {
         {ltext = "This system has 4 vertical "%_t, rtext = "", icon = ""},

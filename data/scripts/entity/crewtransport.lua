@@ -48,6 +48,8 @@ function CrewTransport.initialize(reservedFor, crew_in)
 
     elseif onClient() then
         CrewTransport.sync()
+
+        Player():registerCallback("onPreRenderHud", "onPreRenderHud")
     end
 end
 
@@ -99,6 +101,22 @@ function CrewTransport.finish()
     ShipAI():setIdle()
     Entity():addScriptOnce("entity/ai/passsector.lua")
     terminate()
+end
+
+function CrewTransport.onPreRenderHud()
+
+    if not data.reserved then return end
+    if Player().craftIndex.string ~= data.reserved then return end
+
+    -- display nearest x
+    local renderer = UIRenderer()
+    local entity = Entity()
+
+    renderer:renderEntityArrow(entity, 30, 10, 250, ColorRGB(1, 1, 1), 0.12);
+    renderer:renderEntityArrow(entity, 30, 10, 250, ColorRGB(0.9, 0.9, 0.9), 0.115);
+    renderer:renderEntityArrow(entity, 30, 10, 250, ColorRGB(0.8, 0.8, 0.8), 0.11);
+
+    renderer:display()
 end
 
 function CrewTransport.secure()
