@@ -17,6 +17,143 @@ AncientGatesMap = require ("ancientgatesmap")
 
 local assert = assert
 local SectorGenerator = {}
+
+-- ACCESS START
+-- Easily change all aspects of asteroids
+-- Set to Avorion Defaults
+
+----------------------------------
+-- Advanced Mineral Spawn Start --
+----------------------------------
+
+-- Switch to per Material Spawn true 1/ false 0
+local perMaterialSpawn = 0
+
+-- Iron
+local minIronSize = 10.0
+local maxIronSize = 20.5
+local minIronMulti = 1
+local maxIronMulti = 1
+
+-- Titanium
+local minTitaniumSize = 0.0
+local maxTitaniumSize = 2.5
+local minTitaniumMulti = 1
+local maxTitaniumMulti = 1
+
+-- Naonite
+local minNaoniteSize = 0.0
+local maxNaoniteSize = 2.5
+local minNaoniteMulti = 1
+local maxNaoniteMulti = 1
+
+-- Trinium
+local minTriniumSize = 0.0
+local maxTriniumSize = 2.5
+local minTriniumMulti = 1
+local maxTriniumMulti = 1
+
+-- Xanion
+local minXanionSize = 0.0
+local maxXanionSize = 2.5
+local minXanionMulti = 1
+local maxXanionMulti = 1
+
+-- Ogonite
+local minOgoniteSize = 0.0
+local maxOgoniteSize = 2.5
+local minOgoniteMulti = 1
+local maxOgoniteMulti = 1
+
+-- Avorion
+local minAvorionSize = 0.0
+local maxAvorionSize = 2.5
+local minAvorionMulti = 1
+local maxAvorionMulti = 1
+
+--------------------------------
+-- END ADVANCED SPAWN-----------
+--------------------------------
+
+-------------------------------------------
+-- Basic Material Spawn Start--------------
+-- Ignore if using Advanced Mineral Spawn--
+-------------------------------------------
+
+-- Mineral Asteroids
+local minMineralSize = 9.0
+local maxMineralSize = 12.5
+local minMineralMulti = 5.0
+local maxMineralMulti = 15.0
+
+--------------------------------------
+-----END Basic Material Spawn---------
+--------------------------------------
+
+-- Regular Asteroids
+local minRockSize = 0.0
+local maxRockSize = 2.5
+local minRockMulti = 1.0
+local maxRockMulti = 1.0
+
+-- Claimable Asteroids
+local minClaimSize = 100
+local maxClaimSize = 100
+local minClaimMulti = 10
+local maxClaimMulti = 10
+
+-- Large Asteroids
+-- Mineral
+local minBigSize = 40
+local maxBigSize = 60
+local minBigMulti = 8
+local maxBigMulti = 18
+
+-- Non Mineral
+local minBigRockSize = 40
+local maxBigRockSize = 60
+local minBigRockMulti = 1.0
+local maxBigRockMulti = 1
+
+-- Field Sizes
+-- Mineral Fields
+local denseAsteroidCount = 900
+local maxDenseBeltVolume = 5800
+local minDenseAsteroidCount = 5.0 * 4
+local maxDenseAsteroidCount = 25.0 * 4
+local minDenseFuzzy = 0.8
+local maxDenseFuzzy = 1.25
+
+local normalAsteroidCount = 600
+local maxNormalBeltVolume = 4800
+local minNormalAsteroidCount = 5.0 * 2
+local maxNormalAsteroidCount = 25.0 * 2
+local minNormalFuzzy = 0.5
+local maxNormalFuzzy = 1.0
+
+local smallAsteroidCount = 400
+local maxSmallBeltVolume = 3800
+local minSmallAsteroidCount = 5.0 * 3
+local maxSmallAsteroidCount = 25.0 * 3
+local minSmallFuzzy = 0.2
+local maxSmallFuzzy = 0.5
+
+-- Non Mineral Fields
+local emptyAsteroidCount = 400
+local maxEmptyBeltVolume = 3800
+local minEmptyAsteroidCount = 5.0
+local maxEmptyAsteroidCount = 25.0
+local minEmptyFuzzy = 0.8
+local maxEmptyFuzzy = 1.0
+
+local emptySmallAsteroidCount = 200
+local maxEmptySmallBeltVolume = 2800
+local minEmptySmallAsteroidCount = 5.0
+local maxEmptySmallAsteroidCount = 25.0
+local minEmptySmallFuzzy = 0.2
+local maxEmptySmallFuzzy = 0.4
+-- ACCESS END
+
 SectorGenerator.__index = SectorGenerator
 
 local function new(x, y)
@@ -31,9 +168,9 @@ function SectorGenerator:getPositionInSector(maxDist)
     local position = vec3(math.random(), math.random(), math.random());
     local dist = 0
     if maxDist == nil then
-        dist = getFloat(-5000, 5000)
+        dist = getFloat(-10000, 10000)
     else
-        dist = getFloat(-maxDist, maxDist)
+        dist = getFloat(-maxDist * 2, maxDist * 2)
     end
 
     position = position * dist
@@ -54,8 +191,8 @@ end
 function SectorGenerator:getUniformPositionInSector(maxDist)
     -- uniform version of getPositionInSector
     local position = random():getDirection()
-    maxDist = maxDist or getFloat(-5000, 5000)
-    position = position * maxDist
+    maxDist = maxDist or getFloat(-10000, 10000)
+    position = position * maxDist * 2
 
     local up = random():getDirection()
     local look = random():getDirection()
@@ -251,7 +388,7 @@ function SectorGenerator:createClaimableAsteroid(position)
        )
 
     desc.position = position or self:getPositionInSector()
-    desc:setMovePlan(PlanGenerator.makeBigAsteroidPlan(100, 0, Material(0)))
+    desc:setMovePlan(PlanGenerator.makeBigAsteroidPlan(lerp(math.random(), 1, 1, minClaimSize * minClaimMulti, maxClaimSize * maxClaimMulti), 0, Material(0)))
     desc:addScript("claim.lua")
 
     return Sector():createEntity(desc)
@@ -291,18 +428,18 @@ function SectorGenerator:createAsteroidFieldEx(numAsteroids, fieldSize, minAster
         local size;
 
         if math.random() < 0.15 then
-            size = lerp(math.random(), 0, 1.0, minAsteroidSize, maxAsteroidSize);
+			--size = lerp(math.random(), 0, 1.0, minAsteroidSize, maxAsteroidSize);
             if resources == 1 then
                 resources = 0
                 asteroidsWithResources = asteroidsWithResources + 1
             end
         else
-            size = lerp(math.random(), 0, 2.5, minAsteroidSize, maxAsteroidSize);
+            --size = lerp(math.random(), 0, 2.5, minAsteroidSize, maxAsteroidSize);
         end
 
         -- create the local position in the field
         local angle = getFloat(0, math.pi * 2.0)
-        local height = getFloat(-fieldSize / 5, fieldSize / 5)
+        local height = getFloat(-fieldSize / 2, fieldSize / 2)
 
         local distFromCenter = getFloat(0, fieldSize * 0.75)
         local asteroidPosition = vec3(math.sin(angle) * distFromCenter, height, math.cos(angle) * distFromCenter)
@@ -310,52 +447,79 @@ function SectorGenerator:createAsteroidFieldEx(numAsteroids, fieldSize, minAster
         asteroidPosition = mat:transformCoord(asteroidPosition)
 
         local material = self:getAsteroidType()
-        self:createSmallAsteroid(asteroidPosition, size, resources, material)
+		if resources == 1 then
+			if perMaterialSpawn == 1 then
+				if material.value == 0 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minIronSize, maxIronSize, minAsteroidSize * minIronMulti, maxAsteroidSize * maxIronMulti), resources, material)
+				elseif material.value == 1 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minTitaniumSize, maxTitaniumSize, minAsteroidSize * minTitaniumMulti, maxAsteroidSize * maxTitaniumMulti), resources, material)
+				elseif material.value == 2 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minNaoniteSize, maxNaoniteSize, minAsteroidSize * minNaoniteMulti, maxAsteroidSize * maxNaoniteMulti), resources, material)
+				elseif material.value == 3 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minTriniumSize, maxTriniumSize, minAsteroidSize * minTriniumMulti, maxAsteroidSize * maxTriniumMulti), resources, material)
+				elseif material.value == 4 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minXanionSize, maxXanionSize, minAsteroidSize * minXanionMulti, maxAsteroidSize * maxXanionMulti), resources, material)
+				elseif material.value == 5 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minOgoniteSize, maxOgoniteSize, minAsteroidSize * minOgoniteMulti, maxAsteroidSize * maxOgoniteMulti), resources, material)
+				elseif material.value == 6 then
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minAvorionSize, maxAvorionSize, minAsteroidSize * minAvorionMulti, maxAsteroidSize * maxAvorionMulti), resources, material)
+				else
+					--Error Block
+					self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minMineralSize, maxMineralSize, minAsteroidSize * minMineralMulti, maxAsteroidSize * maxMineralMulti), resources, material)
+				end
+			else
+				self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minMineralSize, maxMineralSize, minAsteroidSize * minMineralMulti, maxAsteroidSize * maxMineralMulti), resources, material)
+			end
+		else
+			--print("Non mineral Spawn")
+			self:createSmallAsteroid(asteroidPosition, lerp(math.random(), minRockSize, maxRockSize, minAsteroidSize * minRockMulti, maxAsteroidSize * maxRockMulti), resources, material)
+		end
     end
 
     return mat
 end
 
 function SectorGenerator:createDenseAsteroidField(probability)
-    local size = getFloat(0.8, 1.25)
+    local size = getFloat(minDenseFuzzy, maxDenseFuzzy)
 
-    return self:createAsteroidFieldEx(500 * size, 1800 * size, 5.0, 25.0, 1, probability);
+    return self:createAsteroidFieldEx(denseAsteroidCount * size, maxDenseBeltVolume * size, minDenseAsteroidCount, maxDenseAsteroidCount, 1, probability);
 end
 
 function SectorGenerator:createAsteroidField(probability)
-    local size = getFloat(0.5, 1.0)
+    local size = getFloat(minNormalFuzzy, maxNormalFuzzy)
 
-    return self:createAsteroidFieldEx(300 * size, 1800 * size, 5.0, 25.0, 1, probability);
+    return self:createAsteroidFieldEx(normalAsteroidCount * size, maxNormalBeltVolume * size, minNormalAsteroidCount, maxNormalAsteroidCount, 1, probability);
 end
 
 function SectorGenerator:createSmallAsteroidField(probability)
-    local size = getFloat(0.2, 0.4)
+    local size = getFloat(minSmallFuzzy, maxSmallFuzzy)
 
-    return self:createAsteroidFieldEx(200 * size, 1800 * size, 5.0, 25.0, 1, probability);
+    return self:createAsteroidFieldEx(smallAsteroidCount * size, maxSmallBeltVolume * size, minSmallAsteroidCount, maxSmallAsteroidCount, 1, probability);
 end
 
 function SectorGenerator:createEmptyAsteroidField()
-    local size = getFloat(0.8, 1.0)
+    local size = getFloat(minEmptyFuzzy, maxEmptyFuzzy)
 
-    return self:createAsteroidFieldEx(400 * size, 1800 * size, 5.0, 25.0, 0);
+    return self:createAsteroidFieldEx(emptyAsteroidCount * size, maxEmptyBeltVolume * size, minEmptyAsteroidCount, maxEmptyAsteroidCount, 0);
 end
 
 function SectorGenerator:createEmptySmallAsteroidField()
-    local size = getFloat(0.2, 0.4)
+    local size = getFloat(minEmptySmallFuzzy, maxEmptySmallFuzzy)
 
-    return self:createAsteroidFieldEx(200 * size, 1800 * size, 5.0, 25.0, 0);
+    return self:createAsteroidFieldEx(emptySmallAsteroidCount * size, maxEmptySmallBeltVolume * size, minEmptySmallAsteroidCount, maxEmptySmallAsteroidCount, 0);
 end
 
 -- create an asteroid
 function SectorGenerator:createBigAsteroid(position)
     position = position or self:getPositionInSector(5000)
-    return self:createBigAsteroidEx(position, getFloat(40, 60), 1)
+	-- (position, getFloat(min size multiple, max size multiple), resources y/n)
+    return self:createBigAsteroidEx(position, getFloat(minBigSize * minBigMulti, maxBigSize * maxBigMulti), 1)
 end
 
 -- create an empty asteroid
 function SectorGenerator:createEmptyBigAsteroid()
     local position = self:getPositionInSector(5000)
-    return self:createBigAsteroidEx(position, getFloat(40, 60), 0)
+    return self:createBigAsteroidEx(position, getFloat(minBigRockSize * minBigRockMulti, maxBigRockSize * maxBigRockMulti), 0)
 end
 
 function SectorGenerator:createBigAsteroidEx(position, size, resources)

@@ -197,7 +197,7 @@ end
 
 function Balancing_GetSectorMiningDPS(x, y)
     -- this is a good value for mining lasers in the beginning
-    local dps = 3.0
+    local dps = 3.0 * 6
 
     local materialFactor = 1.0 + (Balancing_GetSectorMaterialStrength(x, y) - 1.0) * 0.1
 
