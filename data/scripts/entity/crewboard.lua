@@ -108,7 +108,7 @@ function CrewBoard.initialize()
 
         -- first insert all with probability >= 1
         for _, crew in pairs(probabilities) do
-            if crew.probability > 1.0 and #availableCrew < 14 then
+            if crew.probability >= 1.0 and #availableCrew < 14 then
                 table.insert(availableCrew, crew)
             end
         end
@@ -152,14 +152,14 @@ function CrewBoard.initUI()
 
     local hsplit = UIHorizontalSplitter(Rect(vec2(0, 10), size), 10, 10, 0.8)
 
-    local hmsplit = UIHorizontalMultiSplitter(hsplit.top, 10, 10, 6)
+    local hmsplit = UIHorizontalMultiSplitter(hsplit.top, 10, 10, 13)
 
-    local padding = 15
-    local iconSize = 30
-    local barSize = 185
-    local sliderSize = 350
-    local priceSize = 70
-    local buttonSize = 150
+    local padding = 15 / 1.5
+    local iconSize = 30 / 1.5
+    local barSize = 185 / 1.5
+    local sliderSize = 350 * 1.5
+    local priceSize = 70 / 1.5
+    local buttonSize = 150 / 1.5
 
     local iconX = 15
     local barX = iconX + iconSize + padding

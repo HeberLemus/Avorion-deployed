@@ -32,7 +32,7 @@ function Balancing_GetSectorRichnessFactor(x, y, scale)
     local richness = distFactor * 2.0 - 2 -- cubic rise from 1 to 14
     richness = richness + linFactor * 6 -- mix of cubic + linear rise from 1 to 20
 
-    return 1.0 + richness / 20 * scale
+    return 1.0 + richness / 25 * scale
 end
 
 
@@ -236,7 +236,7 @@ function Balancing_GetMaterialProbability(x, y)
     end
 
     -- always add a small amount of titanium so building isn't too frustrating at the start
-    if distFromCenter < 460 then
+    if distFromCenter < 470 then
         result[1] = math.max(result[1], 0.065)
     end
 
@@ -268,23 +268,23 @@ function Balancing_GetWeaponProbability(x, y)
 
     local data = {}
 
-    data[WeaponType.ChainGun] =             {p = 3.0}
-    data[WeaponType.PointDefenseChainGun] = {p = 1.0}
-    data[WeaponType.MiningLaser] =          {p = 3.0}
-    data[WeaponType.SalvagingLaser] =       {p = 2.0}
-    data[WeaponType.Bolter] =               {d = 0.9, p = 1.0}
-    data[WeaponType.ForceGun] =             {d = 0.85, p = 1.0}
-    data[WeaponType.Laser] =                {d = 0.75, p = 2.0}
-    data[WeaponType.TeslaGun] =             {d = 0.73, p = 2.0}
-    data[WeaponType.PulseCannon] =          {d = 0.73, p = 1.0}
-    data[WeaponType.AntiFighter] =          {d = 0.7, p = 2.0}
-    data[WeaponType.Cannon] =               {d = 0.65, p = 2.0}
-    data[WeaponType.RepairBeam] =           {d = 0.65, p = 2.0}
-    data[WeaponType.PointDefenseLaser] =    {d = 0.6, p = 1.0}
-    data[WeaponType.PlasmaGun] =            {d = 0.6, p = 2.0}
-    data[WeaponType.RocketLauncher] =       {d = 0.6, p = 1.0}
-    data[WeaponType.RailGun] =              {d = 0.6, p = 1.0}
-    data[WeaponType.LightningGun] =         {d = 0.4, p = 2.0}
+    data[WeaponType.ChainGun] =             {p = 6.0}
+    data[WeaponType.PointDefenseChainGun] = {p = 3.0}
+    data[WeaponType.MiningLaser] =          {p = 4.0}
+    data[WeaponType.SalvagingLaser] =       {p = 3.0}
+    data[WeaponType.Bolter] =               {d = 0.9, p = 5.0}
+    data[WeaponType.ForceGun] =             {d = 0.85, p = 2.0}
+    data[WeaponType.Laser] =                {d = 0.75, p = 4.0}
+    data[WeaponType.TeslaGun] =             {d = 0.73, p = 3.0}
+    data[WeaponType.PulseCannon] =          {d = 0.73, p = 5.0}
+    data[WeaponType.AntiFighter] =          {d = 0.7, p = 1.0}
+    data[WeaponType.Cannon] =               {d = 0.85, p = 3.0}
+    data[WeaponType.RepairBeam] =           {d = 0.85, p = 3.0}
+    data[WeaponType.PointDefenseLaser] =    {d = 0.6, p = 3.0}
+    data[WeaponType.PlasmaGun] =            {d = 0.6, p = 4.0}
+    data[WeaponType.RocketLauncher] =       {d = 0.6, p = 3.0}
+    data[WeaponType.RailGun] =              {d = 0.6, p = 4.0}
+    data[WeaponType.LightningGun] =         {d = 0.4, p = 3.0}
 
     local probabilities = {}
 
