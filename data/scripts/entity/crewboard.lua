@@ -52,19 +52,19 @@ function CrewBoard.initialize()
         scaling = math.max(1, scaling)
 
         local probabilities = {}
-        table.insert(probabilities, {profession = CrewProfessionType.None, probability = 1.0, number = math.floor(math.random(30, 40) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Engine, probability = 0.5, number = math.floor(math.random(5, 15) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Repair, probability = 0.5, number = math.floor(math.random(5, 15) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Gunner, probability = 0.5, number = math.floor(math.random(5, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Miner, probability = 0.5, number = math.floor(math.random(5, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Pilot, probability = 0.5, number = math.floor(math.random(3, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Security, probability = 0.4, number = math.floor(math.random(3, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Attacker, probability = 0.25, number = math.floor(math.random(3, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Sergeant, probability = 0.4, number = math.floor(math.random(4, 10) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Lieutenant, probability = 0.3, number = math.floor(math.random(4, 7) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Commander, probability = 0.25, number = math.floor(math.random(3, 5) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.General, probability = 0.15, number = math.floor(math.random(1, 2) * scaling)})
-        table.insert(probabilities, {profession = CrewProfessionType.Captain, probability = 0.75, number = math.random(1, 2)})
+        table.insert(probabilities, {profession = CrewProfessionType.None, probability = 1.5, number = math.floor(math.random(400, 500) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Engine, probability = 1.0, number = math.floor(math.random(400, 500) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Repair, probability = 1.0, number = math.floor(math.random(400, 500) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Gunner, probability = 1.0, number = math.floor(math.random(30, 200) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Miner, probability = 1.0, number = math.floor(math.random(15, 70) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Pilot, probability = 1.0, number = math.floor(math.random(10, 70) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Security, probability = 1.0, number = math.floor(math.random(10, 30) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Attacker, probability = 1.0, number = math.floor(math.random(10, 30) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Sergeant, probability = 1.0, number = math.floor(math.random(20, 70) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Lieutenant, probability = 1.0, number = math.floor(math.random(20, 68) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Commander, probability = 1.0, number = math.floor(math.random(12, 50) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.General, probability = 1.0, number = math.floor(math.random(7, 13) * scaling)})
+        table.insert(probabilities, {profession = CrewProfessionType.Captain, probability = 1.0, number = math.random(3, 6)})
 
         local station = Entity()
         -- crew for specific stations
@@ -108,13 +108,13 @@ function CrewBoard.initialize()
 
         -- first insert all with probability >= 1
         for _, crew in pairs(probabilities) do
-            if crew.probability >= 1.0 and #availableCrew < 6 then
+            if crew.probability > 1.0 and #availableCrew < 14 then
                 table.insert(availableCrew, crew)
             end
         end
 
         for _, crew in pairs(probabilities) do
-            if crew.probability < 1.0 and math.random() < crew.probability and #availableCrew < 6 then
+            if crew.probability < 1.0 and math.random() < crew.probability and #availableCrew < 14 then
                 table.insert(availableCrew, crew)
             end
         end
@@ -139,7 +139,7 @@ function CrewBoard.initUI()
 
     local res = getResolution()
 
-    local size = vec2(870, 400)
+    local size = vec2(870, 600)
 
 
     local menu = ScriptUI()
@@ -167,7 +167,7 @@ function CrewBoard.initUI()
     local priceX = sliderX + sliderSize + padding
     local buttonX = priceX + priceSize + padding
 
-    for i = 0, 6 do
+    for i = 0, 13 do
         local rect = hmsplit:partition(i)
 
         local pic = window:createPicture(Rect(iconX, rect.lower.y, iconX + iconSize, rect.upper.y), "")
