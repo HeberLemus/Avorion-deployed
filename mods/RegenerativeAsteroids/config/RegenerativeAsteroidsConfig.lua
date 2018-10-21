@@ -13,9 +13,9 @@ RegenerativeAsteroidsConfig.RepeatedSectorEntryAlerts = false;--true or false, t
 RegenerativeAsteroidsConfig.MaxNonMinableAsteroids = 250;--Number of max NonMinable asteroids a regenerative sector can have.
 
 --WARNING only change these if you know what your doing.
-RegenerativeAsteroidsConfig.FieldSize = 3800; --any number value, the larger the number the larger the FIELD
-RegenerativeAsteroidsConfig.MinAsteroidSize = 45.0; --any number smaler then MaxAsteroidSize
-RegenerativeAsteroidsConfig.MaxAsteroidSize = 125.0; --Any number larger then MinAsteroidSize, 100 is the size of claimable asteroids
+RegenerativeAsteroidsConfig.FieldSize = 6800; --any number value, the larger the number the larger the FIELD
+RegenerativeAsteroidsConfig.MinAsteroidSize = 15.0; --any number smaler then MaxAsteroidSize
+RegenerativeAsteroidsConfig.MaxAsteroidSize = 55.0; --Any number larger then MinAsteroidSize, 100 is the size of claimable asteroids
 
 function RegenerativeAsteroidsConfig.print(...)
   local args = table.pack(...)
