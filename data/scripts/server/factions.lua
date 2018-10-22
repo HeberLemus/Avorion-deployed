@@ -122,11 +122,13 @@ function initializePlayer(player)
     -- create turret generator
     local dps, tech = Balancing_GetSectorWeaponDPS(450, 0)
     local turret = InventoryTurret(GenerateTurretTemplate(random:createSeed(), WeaponType.ChainGun, dps, tech, Rarity(RarityType.Uncommon), Material(MaterialType.Iron)))
+    turret.automatic = true
     player:getInventory():add(turret, false)
     player:getInventory():add(turret, false)
 
     local dps, tech = Balancing_GetSectorMiningDPS(450, 0)
     local turret = InventoryTurret(GenerateTurretTemplate(random:createSeed(), WeaponType.MiningLaser, dps, tech, Rarity(RarityType.Uncommon), Material(MaterialType.Iron)))
+    turret.automatic = true
     player:getInventory():add(turret, false)
     player:getInventory():add(turret, false)
 

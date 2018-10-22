@@ -47,8 +47,10 @@ function TurretGenerator.generate(x, y, offset_in, rarity_in, type_in, material_
     rarities[0] = 128 -- common
 
     local rarity = rarity_in or Rarity(getValueFromDistribution(rarities))
-
-    return GenerateTurretTemplate(seed, weaponType, dps, tech, rarity, material)
+	-- Begin altered code.
+    local TurretTemplate T = GenerateTurretTemplate(seed, weaponType, dps, tech, rarity, material)
+	T.automatic = true
+	return T
 end
 
 function TurretGenerator.generateArmed(x, y, offset_in, rarity_in, material_in) -- server
