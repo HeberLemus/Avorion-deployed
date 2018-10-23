@@ -56,7 +56,7 @@ function SectorTemplate.generate(player, seed, x, y)
         PirateGenerator.createBandit(generator:getPositionInSector(5000))
     end
 
-    local numAsteroids = math.random(1, 3)
+    local numAsteroids = 10
     for i = 1, numAsteroids do
         local mat = generator:createAsteroidField()
         local asteroid = generator:createClaimableAsteroid()

@@ -42,7 +42,7 @@ function SectorTemplate.generate(player, seed, x, y)
         if math.random() < 0.15 then generator:createStash(mat) end
     end
 
-    local numAsteroids = math.random(0, 1)
+    local numAsteroids = 10
     for i = 1, numAsteroids do
         local mat = generator:createAsteroidField()
         local asteroid = generator:createClaimableAsteroid()

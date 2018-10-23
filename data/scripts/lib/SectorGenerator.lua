@@ -97,10 +97,10 @@ local minRockMulti = 1.0
 local maxRockMulti = 1.0
 
 -- Claimable Asteroids
-local minClaimSize = 100
-local maxClaimSize = 100
-local minClaimMulti = 10
-local maxClaimMulti = 10
+local minClaimSize = 20
+local maxClaimSize = 40
+local minClaimMulti = 4
+local maxClaimMulti = 4
 
 -- Large Asteroids
 -- Mineral
