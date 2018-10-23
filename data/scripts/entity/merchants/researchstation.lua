@@ -14,6 +14,12 @@ local Dialog = require("dialogutility")
 
 local button
 
+-- START DRACONIAN
+local autoButton
+local raritySelection
+local systemSelection
+-- END DRACONIAN
+
 function initialize()
     if onClient() and EntityIcon().icon == "" then
         EntityIcon().icon = "data/textures/icons/pixel/research.png"
@@ -82,9 +88,56 @@ function initUI()
 
     button = window:createButton(Rect(), "Research"%_t, "onClickResearch")
     button.width = 200
-    button.height = 40
-    organizer:placeElementBottom(button)
+    -- START DRACONIAN
+    --button.height = 40
+    --organizer:placeElementBottom(button)
+    button.height = 20
+    organizer:placeElementBottomLeft(button)
+    -- END DRACONIAN
 
+    -- START DRACONIAN
+    local autoSplitter = UIHorizontalSplitter(vsplit.right, 5, 5, 0.5)
+    raritySelection = window:createComboBox(Rect(), "onRaritySelect")
+    raritySelection.width = 150
+    raritySelection.height = 25
+    autoSplitter:placeElementTopLeft(raritySelection)
+
+    raritySelection:addEntry("Common"%_t)
+    raritySelection:addEntry("Uncommon"%_t)
+    raritySelection:addEntry("Rare"%_t)
+    raritySelection:addEntry("Exceptional"%_t)
+
+    systemSelection = window:createComboBox(Rect(), "onSystemSelect")
+    systemSelection.width = 200
+    systemSelection.height = 30
+    autoSplitter:placeElementTopRight(systemSelection)
+
+    systemSelection:addEntry("All"%_t)
+    systemSelection:addEntry("Battery Upgrade"%_t)
+    systemSelection:addEntry("Cargo Upgrade"%_t)
+    systemSelection:addEntry("Energy To Shield Converter"%_t)
+    systemSelection:addEntry("Engine Upgrade"%_t)
+    systemSelection:addEntry("Generator Upgrade"%_t)
+    systemSelection:addEntry("Hyperspace Upgrade"%_t)
+    systemSelection:addEntry("Mining System"%_t)
+    systemSelection:addEntry("Object Detector"%_t)
+    systemSelection:addEntry("Radar Upgrade"%_t)
+    systemSelection:addEntry("Scanner Upgrade"%_t)
+    systemSelection:addEntry("Shield Booster"%_t)
+    systemSelection:addEntry("Shield Reinforcer"%_t)
+    systemSelection:addEntry("A-TCS"%_t)
+    systemSelection:addEntry("C-TCS"%_t)
+    systemSelection:addEntry("M-TCS"%_t)
+    systemSelection:addEntry("Technology Fragment"%_t)
+    systemSelection:addEntry("Tractor Beam"%_t)
+    systemSelection:addEntry("Trading System"%_t)
+    systemSelection:addEntry("Velocity Security"%_t)
+
+    autoButton = window:createButton(Rect(), "Auto Research"%_t, "onStartAutoResearch")
+    autoButton.width = 200
+    autoButton.height = 20
+    autoSplitter:placeElementBottomRight(autoButton)
+    -- END DRACONIAN
 end
 
 function removeItemFromMainSelection(key)
@@ -441,6 +494,204 @@ function onClickResearch()
 
     invokeServerFunction("research", itemIndices)
 end
+
+-- START DRACONIAN
+-- Auto Research
+function getUIRarity()
+    return Rarity(raritySelection.selectedIndex).value
+end
+
+function getUISystems()
+    return systemSelection.selectedEntry
+end
+
+function onStartAutoResearch()
+    autoButton.active = false
+    local maxRarity = getUIRarity()
+    local systemType = getUISystems()
+    --print ("Rarity", maxRarity, "Systems", systemType)
+    invokeServerFunction("autoResearch", maxRarity, systemType)
+end
+
+function onRaritySelect()
+    -- TODO: Something here?
+end
+
+
+function onSystemSelect()
+    -- TODO: Something here?
+end
+
+function autoResearchComplete()
+    autoButton.active = true
+end
+
+function autoResearch(maxRarity, systemType)
+    -- inventory:clear()
+    -- for i = 1, 50 do
+    --     inventory:addEmpty()
+    -- end
+
+    -- local player = Player()
+    -- local ship = player.craft
+    -- local alliance = player.alliance
+    --
+    -- if alliance and ship.factionIndex == player.allianceIndex then
+    --     inventory:fill(alliance.index)
+    -- else
+    --     inventory:fill(player.index)
+    -- end
+
+    -- item.item.itemType == InventoryItemType.SystemUpgrade
+    -- getItemsByType(InventoryItemType type)
+
+    local items = {}
+    local itemIndices = {}
+    local player
+    local min = 5
+    local max = 5
+
+    items, itemIndices, player = getIndices(RarityType.Petty, min, max, systemType)
+    if (#items < min) then
+        --print ("Need to check common", systemType)
+        items, itemIndices = getIndices(RarityType.Common, min, max, systemType)
+    end
+    if (#items < min and maxRarity >= RarityType.Uncommon) then
+        --print ("Need to check uncommon", systemType)
+        items, itemIndices = getIndices(RarityType.Uncommon, min, max, systemType)
+    end
+    if (#items < min and maxRarity >= RarityType.Rare) then
+        --print ("Need to check rare", systemType)
+        items, itemIndices = getIndices(RarityType.Rare, min, max, systemType)
+    end
+    if (#items < min and maxRarity >= RarityType.Exceptional) then
+        --print ("Need to check exceptional", systemType)
+        items, itemIndices = getIndices(RarityType.Exceptional, min, max, systemType)
+    end
+
+
+    --local common = getSystemsByRarity(RarityType.Common)
+    --local uncommon = getSystemsByRarity(RarityType.Uncommon)
+    --local rare = getSystemsByRarity(RarityType.Rare)
+
+    -- local inventory = Faction(factionIndex):getInventory()
+    -- local inventoryItems = inventory:getItemsByType(InventoryItemType.SystemUpgrade)
+    --
+    -- for i, inventoryItem in pairs(inventoryItems) do
+    --     if (inventoryItem.item.rarity < RarityType.Rare) then
+    --         print (i, tostring(inventoryItem.item.name))
+    --     end
+    -- end
+
+    if (#items >= min) then
+        research(itemIndices)
+        -- Lets loop it!
+        -- We want to make sure the inventory index doesn't pick the wrong item so thats why we don't do it in bulk oringinally
+        autoResearch(maxRarity, systemType)
+    else
+        --print ("Only have", #items, "items")
+        invokeClientFunction(player, "autoResearchComplete")
+    end
+end
+
+function getIndices(rarity, min, max, systemType)
+    local items = {}
+    local itemIndices = {}
+    local researchTime = false
+    local grouped, player = getSystemsByRarity(rarity, systemType)
+
+    --print ("Found", #grouped, rarity)
+    for g, group in pairs(grouped) do
+        --print ("Group Count", #group)
+        itemIndices = {}
+        items = {}
+        if #group >= min then
+            for i, itemInfo in pairs(group) do
+                --print (i, itemInfo.item.name, itemInfo.index)
+                items[i] = itemInfo.item
+                itemIndices[itemInfo.index] = 1
+                if #items == max then
+                    researchTime = true
+                    break
+                end
+            end
+            if researchTime then break end
+        end
+    end
+    local itemIndicesCount = 0
+    for i, idx in pairs(itemIndices) do
+        itemIndicesCount = itemIndicesCount + 1
+    end
+    --print ("Found items", #items, rarity, itemIndicesCount)
+
+    return items, itemIndices, player
+end
+
+function getSystemsByRarity(rarityType, systemType)
+    local buyer, ship, player = getInteractingFaction(callingPlayer, AlliancePrivilege.SpendResources)
+    -- local faction = Faction(factionIndex)
+    local inventory = buyer:getInventory()
+    local inventoryItems = inventory:getItemsByType(InventoryItemType.SystemUpgrade)
+    local grouped = {}
+    --print ("Rarity Type", rarityType)
+    --print ("Inventory Items", #inventoryItems)
+    --print("Inventory Items", tostring(inventoryItems[0]), tostring(inventoryItems[1]), tostring(inventoryItems[2]), tostring(inventoryItems[3]))
+    --printObj({inventoryItems})
+
+    for i, inventoryItem in pairs(inventoryItems) do
+        if (inventoryItem.item.rarity.value == rarityType and not inventoryItem.item.favorite)
+        and (systemType == "All" or inventoryItem.item.name:find(systemType)) then
+            --print ("Item [" .. i .. "]", inventoryItem.item.name, inventoryItem.item.rarity.value, inventoryItem.item.seed.int32)
+            local existing = grouped[inventoryItem.item.name]
+            if existing == nil then
+                --print ("Adding new item", inventoryItem.item.name)
+                grouped[inventoryItem.item.name] = {}
+                grouped[inventoryItem.item.name][1] = { item = inventoryItem.item, index = i } --.seed.int32
+            else
+                --print ("Adding to existing", tostring(inventoryItem.item.name))
+                existing[#existing + 1] = { item = inventoryItem.item, index = i } --.seed.int32
+            end
+            -- printObj(inventoryItem)
+            -- print(inventoryItem.item)
+            --print("Inventory Item", tostring(inventoryItem[0]), tostring(inventoryItem[1]), tostring(inventoryItem[2]), tostring(inventoryItem[3]))
+        end
+    end
+
+    return grouped, player
+end
+
+function printObj(obj, hierarchyLevel)
+    if (hierarchyLevel == nil) then
+        hierarchyLevel = 0
+    elseif (hierarchyLevel == 4) then
+        return 0
+    end
+
+    -- for key, value in pairs(obj) do
+    --     print("found member " .. tostring(key), tostring(value));
+    -- end
+    local whitespace = ""
+    for i = 0, hierarchyLevel, 1 do
+        whitespace = whitespace .. "-"
+    end
+
+    print(whitespace, tostring(obj))
+    if (type(obj) == 'table') then
+        for k, v in pairs(obj) do
+            if k > 10 then break end
+            io.write(whitespace .. "-")
+            if (type(v) == 'table') and hierarchyLevel < 1 then
+                printObj(v, hierarchyLevel + 1)
+            else
+                print(v)
+            end
+        end
+    else
+        print(obj)
+    end
+end
+
+-- END DRACONIAN
 
 function research(itemIndices)
     if not itemIndices then return end
