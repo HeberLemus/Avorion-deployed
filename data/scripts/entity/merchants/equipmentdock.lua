@@ -35,7 +35,7 @@ function EquipmentDock.shop:addItems()
         local x, y = Sector():getCoordinates()
         local rarities, weights = UpgradeGenerator.getSectorProbabilities(x, y)
 
-        weights[6] = weights[6] * 0.25 -- strongly reduced probability for normal high rarity equipment
+        weights[6] = weights[6] * 0.75 -- strongly reduced probability for normal high rarity equipment
         weights[7] = 0 -- no legendaries in equipment dock
 
         local system = UpgradeGenerator.generateSystem(nil, weights)
@@ -49,7 +49,7 @@ function EquipmentDock.shop:addItems()
     table.sort(systems, sortSystems)
 
     for _, system in pairs(systems) do
-        EquipmentDock.shop:add(system, getInt(1, 2))
+        EquipmentDock.shop:add(system, 2) --getInt(1, 2))
     end
 
 end

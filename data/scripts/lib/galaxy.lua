@@ -271,7 +271,7 @@ function Balancing_GetWeaponProbability(x, y)
     data[WeaponType.ChainGun] =             {p = 6.0}
     data[WeaponType.PointDefenseChainGun] = {p = 3.0}
     data[WeaponType.MiningLaser] =          {p = 4.0}
-    data[WeaponType.SalvagingLaser] =       {p = 3.0}
+    data[WeaponType.SalvagingLaser] =       {p = 4.0}
     data[WeaponType.Bolter] =               {d = 0.9, p = 5.0}
     data[WeaponType.ForceGun] =             {d = 0.85, p = 2.0}
     data[WeaponType.Laser] =                {d = 0.75, p = 4.0}
