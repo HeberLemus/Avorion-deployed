@@ -21,5 +21,6 @@ end
 -- Config.Add("mods/YourMod/scripts/entity/YourMod.lua")
 Config.Add("mods/AutoDock/scripts/player/autoDockMigrator.lua")
 Config.Add("mods/ComplexCraftOrders/scripts/entity/complexcraftorders.lua")
+Config.Add("mods/CarrierCommander/scripts/entity/CarrierCommander.lua")
 
 return Config

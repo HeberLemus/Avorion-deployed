@@ -340,7 +340,7 @@ function FighterFactory.refreshPointLabels(plan, turret)
         buyer = buyer.alliance
     end
 
-    local price = FighterFactory.getPriceAndTax(boughtFighter, Faction(), buyer)
+    local price = (FighterFactory.getPriceAndTax(boughtFighter, Faction(), buyer) / 500)
 
     statsLabels[5].caption = "${price} Cr"%_t % {price = createMonetaryString(price)}
 end
@@ -771,6 +771,7 @@ function FighterFactory.createFighter(type, plan, turretIndex, sizePoints, durab
     local boughtFighter = SellableFighter(fighter)
 
     local price, tax = FighterFactory.getPriceAndTax(boughtFighter, Faction(), buyer)
+    price = price / 500
 
     local canPay, msg, args = buyer:canPay(price)
     if not canPay then
@@ -805,7 +806,7 @@ function FighterFactory.createFighter(type, plan, turretIndex, sizePoints, durab
 end
 
 function FighterFactory.getPriceAndTax(fighter, stationFaction, buyerFaction)
-    local price = fighter:getPrice()
+    local price = (fighter:getPrice() / 500)
     local tax = price * FighterFactory.tax
 
     if stationFaction.index == buyerFaction.index then
