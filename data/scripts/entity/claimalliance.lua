@@ -6,7 +6,7 @@ require ("faction")
 --Mod Warning - Carrier Command removes namespace
 -- Don't remove or alter the following comment, it tells the game the namespace this script lives in. If you remove it, the script will break.
 -- namespace ClaimFromAlliance
-ClaimFromAlliance = {}
+--ClaimFromAlliance = {}
 
 -- if this function returns false, the script will not be listed in the interaction window,
 -- even though its UI may be registered
