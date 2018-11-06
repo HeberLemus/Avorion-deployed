@@ -340,7 +340,7 @@ function FighterFactory.refreshPointLabels(plan, turret)
         buyer = buyer.alliance
     end
 
-    local price = (FighterFactory.getPriceAndTax(boughtFighter, Faction(), buyer) / 500)
+    local price = (FighterFactory.getPriceAndTax(boughtFighter, Faction(), buyer) / 1.1)
 
     statsLabels[5].caption = "${price} Cr"%_t % {price = createMonetaryString(price)}
 end

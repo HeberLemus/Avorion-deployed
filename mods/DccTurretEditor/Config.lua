@@ -1,6 +1,6 @@
 local Config = {
 
-	RarityMult = 13.769,
+	RarityMult = 26.769,
 	-- how much the rarities get weighted. the default value of 0.1996 means
 	-- scrapping 5 white turrets will buff 0.7% while scrapping 5 legendary
 	-- turrets will buff 5%

@@ -90,8 +90,8 @@ function getFactoryCost(production)
 
     local diff = resultValue - ingredientValue
 
-    local costs = 3000000 -- 3 mio minimum for a factory
-    costs = costs + diff * 4500
+    local costs = 300000 -- 3 mio minimum for a factory
+    costs = costs + diff * 2500
     return costs
 end
 
@@ -113,7 +113,7 @@ function getFactoryUpgradeCost(production, size)
 
     local diff = resultValue - ingredientValue
 
-    local costs = diff * 1000 * size
+    local costs = diff * 100 * size
     return costs
 end
 

@@ -9,14 +9,3 @@ end
 if entity.allianceOwned then
     entity:addScriptOnce("entity/claimalliance.lua")
 end
-
---Carrier Commander
-
-if entity.isShip then
-    if entity.allianceOwned then
-        entity:addScriptOnce("mods/CarrierCommander/scripts/entity/CarrierCommander.lua")
-    end
-    if entity.playerOwned then
-        entity:addScriptOnce("mods/CarrierCommander/scripts/entity/CarrierCommander.lua")
-    end
-end

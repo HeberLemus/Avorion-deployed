@@ -22,7 +22,6 @@ setmetatable(list.actionTostringMap,{
     --list.actionTostringMap[4] = nil                       reserved for new vanilla command
     list.actionTostringMap[5] = "Mining asteroids."
     list.actionTostringMap[6] = "Salvaging wrecks."
-    list.actionTostringMap[7] = "Collecting loot."
 
 list.actionToColorMap = {}
 setmetatable(list.actionToColorMap,{
@@ -41,6 +40,5 @@ setmetatable(list.actionToColorMap,{
     list.actionToColorMap[5] = ColorRGB(0.1, 0.8, 0.1)
     list.actionToColorMap[6] = ColorRGB(0.1, 0.8, 0.1)
     list.tooltipadditions = {}
-    list.actionToColorMap[7] = ColorRGB(0.1, 0.8, 0.1)
 
 return list
